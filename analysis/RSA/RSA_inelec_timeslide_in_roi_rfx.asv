@@ -100,7 +100,7 @@ for sub=1:length(allsubs)
  cfg.ref=  'bipolar'
  cfg.clean='clean' % currently only for bipolar
   elec_selection=mcf_elec_region_selector(cfg,datainfo)
-  all_roi_labels(sub,r)=elec_selection.labels_per_roi;
+  sel_
     end
 end
 clear sel_rois all_label all_elec_label sel_roi_in label_ind
