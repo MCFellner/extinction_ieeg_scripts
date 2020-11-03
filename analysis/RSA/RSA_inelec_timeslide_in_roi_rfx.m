@@ -26,40 +26,20 @@ pre_item=-1;
 post_item=5.5;
 toi=[2 4];
 win_pow=0.05; % in sec, power estimated for every win
-feature='powlogscale';
+win=0.200; % duration of item
+slide=0.05;
+
+pow_feature='powlogscale';
 norm='z_crosstrials';
 
 % downsample to smallest sr
 sr=1000;
-% time window definitions
-% define sliding window
-sr_pow=1/(win_pow);
-win=0.200; % duration of item
-slide=0.05;
 
-step=win/(1/sr_pow)+1;
+
 
 nrand=1000;
 
-cfg_rsa.tois=toi(1):1/sr_pow:toi(2);
-cfg_rsa.t1=toi(1):slide:(toi(2)-win);
-cfg_rsa.t2=cfg_rsa.t1+win;
-cfg_rsa.ind_t1=1:slide/(1/sr_pow):((numel(cfg_rsa.tois)-win/(1/sr_pow)));
-cfg_rsa.ind_t2=cfg_rsa.ind_t1+win/(1/sr_pow);
-cfg_rsa.n_bins=numel(cfg_rsa.t1);
 
-switch feature
-    case 'powlogscale'
-        cfg_freq=[];
-        cfg_freq.output='pow';
-        %cfg.toi =pre_item:0.1:post_item;
-        cfg_freq.keeptrials  = 'yes';
-        cfg_freq.pad='nextpow2';
-        cfg_freq.foi     = logspace(log10(2),log10(200), 50);
-        cfg_freq.toi=cfg_rsa.tois;
-        cfg_freq.method='wavelet';
-        cfg_freq.width = 5;
-end
 roi.hip_l={'Left-Hippocampus'};
 roi.hip_r={'Right-Hippocampus'};
 roi.vmpfc={'ctx-lh-lateralorbitofrontal','ctx-lh-medialorbitofrontal','ctx-rh-lateralorbitofrontal','ctx-rh-medialorbitofrontal'};
@@ -81,7 +61,7 @@ contrast=contrasts{1};
 %%%%%%%%%%%%%%
 load('D:\matlab_tools\jet_grey.mat')
 
-folder_out=fullfile(path_out,[feature,'_timeslide_',norm,'_toi',num2str(toi(1)*1000),'to',num2str(toi(2)*1000)],'stats',contrast);
+folder_out=fullfile(path_out,[pow_feature,'_timeslide_',norm,'_toi',num2str(toi(1)*1000),'to',num2str(toi(2)*1000)],'stats',contrast);
 mkdir(folder_out)
 
 % for every sub check for elecs in the roi (then run rsa/stats)
@@ -107,25 +87,26 @@ end
 
 % subs with electrodes in this roi
 sel_subs=allsubs(cellfun(@isempty, all_roi_labels(:))==0);
-rand_rsa=zeros(numel(sel_subs),2,nrand,cfg_rsa.n_bins,cfg_rsa.n_bins);
-cond_rsa=zeros(numel(sel_subs),2,cfg_rsa.n_bins,cfg_rsa.n_bins);
+%preallocate for speed
+n_bins=numel(toi(1):slide:(toi(2)-win));
+rand_rsa=zeros(numel(sel_subs),2,nrand,n_bins,n_bins);
+cond_rsa=zeros(numel(sel_subs),2,n_bins,n_bins);
 
 for sub=1:length(sel_subs)
     sel_sub=sel_subs{sub};
     sub_ind=find(strcmp(sel_sub,allsubs));
     load(fullfile(path_designmat,strcat(sel_sub,'_contrast_mat_sym')))
-    cfg_rsa.contrast_mat=getfield(contrast_def,contrast);
-    cfg_rsa.sortind=contrast_def.sortind_org2usedtrlinfo;
+    contrast_mat=getfield(contrast_def,contrast);
+    
     % electrodeinfo
     info_file=strcat(path_info,sel_sub,'_datainfo');
     load(info_file)
     load(strcat(path_preproc,sel_sub,'_data.mat'))
-    
-    
+        
     trl(:,1)=datainfo.trigger.trigger_sp+(data.fsample.*pre_item);
     trl(:,2)=datainfo.trigger.trigger_sp+(data.fsample.*post_item);
     trl(:,3)=ones(numel(datainfo.trigger.trigger_sp),1).*(1.*pre_item.*data.fsample);
-        
+    
     cfg_preproc=[];
     cfg_preproc.montage=datainfo.elec_info.bipolar.montage_withoutartichan;
     cfg_preproc.resamplefs      = sr;
@@ -135,73 +116,33 @@ for sub=1:length(sel_subs)
     cfg_preproc.trialinfo=datainfo.trialinfo;
     data=mcf_preproc(cfg_preproc, data);
     clear cfg_preproc
-    
-    all_labels=data.label;
-    trialinfo=data.trialinfo;
-    
-    % define features
-    freq=ft_freqanalysis(cfg_freq,data);
-    clear data
-    
-    num_trials=size(trialinfo,1);
-    num_freq=numel(freq.freq);
-    num_time=numel(freq.time);
-    num_chan=numel(freq.label);
-    
-    switch norm
-        case 'z_crosstrials'
-            m=nanmean(freq.powspctrm,1);
-            s=nanstd(freq.powspctrm,1);
-            freq.powspctrm=(freq.powspctrm-repmat(m,num_trials,1,1,1))./repmat(s,num_trials,1,1,1);
-            clear m s
-    end
-    
-    %%%%%% here: create time bin vectors
-    % reshape in feature vec
-    
-    % tmp_vec: chan_trialXtimebin
-    % average for each bin
-    n_bins=cfg_rsa.n_bins;
-    num_trl=size(freq.powspctrm,1);
-    bin_mat=zeros(num_trl,numel(freq.label),numel(freq.freq),n_bins);
-    for t=1:cfg_rsa.n_bins
-        bin_mat(:,:,:,t)=nanmean(freq.powspctrm(:,:,:,cfg_rsa.ind_t1(t):cfg_rsa.ind_t2(t)),4);
-    end
-    tmp_vec=permute(bin_mat,[1,4,2,3]);% trial x bin x chan x freq
-    tmp_vec=reshape(tmp_vec,[],numel(freq.label)*numel(freq.freq));
-    clear bin_mat
-    
-    rsa.rsa_mat=zeros(num_trl,num_trl,n_bins,n_bins,'single');
-    tmp=corr(tmp_vec(:,:)','Type','Spearman');
-    % fisher z
-    %rsa.rsa_mat=0.5.*log(((ones(size(tmp))+tmp)./(ones(size(tmp))-tmp)));
-    tmp=0.5.*log(((ones(size(tmp))+tmp)./(ones(size(tmp))-tmp)));
-    tmp=reshape(tmp,num_trl,n_bins,num_trl,n_bins);
-    rsa.rsa_mat(:,:,:,:)=single(permute(tmp,[1,3,2,4]));
-    clear tmp
-    clear tmp_vec
-    
-    % rsa_mat is symmetric (timextime), set half of the matrix to Nan to
-    % avoid spurious large clusters in cluster stat
-    nan_mat=repmat(reshape(triu(ones(n_bins),1),1,1,n_bins,n_bins),num_trl,num_trl,1,1);
-    rsa.rsa_mat(logical(nan_mat))=NaN;
-    
-    %rsa.dim='trial_trial_time_time';
-    rsa.dim='trial_time_time';
+            
+   % defintion for features
+    cfg_rsa.freqdef=pow_feature;
+    cfg_rsa.norm=norm;
+    % define sliding window
+    cfg_rsa.toi=toi;
+    cfg_rsa.win_pow=win_pow; % in sec, power estimated for every win
+    cfg_rsa.win=win; % duration of item
+    cfg_rsa.slide=slide;       
+    rsa=mcf_timeslidepowrsa(cfg_rsa,data)
     
     
+    cfg_rsa.contrast_mat=contrast_mat;
+    cfg_rsa.sortind=contrast_def.sortind_org2usedtrlinfo;
     sortind=cfg_rsa.sortind;
     contrast_vec=reshape(cfg_rsa.contrast_mat,[],1);
-    % select only non nan trials
-    sel_ind=~isnan(contrast_vec);
-    contrast_vec=contrast_vec(sel_ind);
-    rsa.contrast_vec=contrast_vec;
     
     % sort rsa to match contrast_mat
     %     rsa.trialinfo=rsa.trialinfo(sortind,:);
     rsa.rsa_mat=rsa.rsa_mat(sortind,:,:,:);
     rsa.rsa_mat=rsa.rsa_mat(:,sortind,:,:);
     rsa.rsa_mat=reshape(rsa.rsa_mat,[],n_bins,n_bins);
+    
+    % select only non nan trials
+    sel_ind=~isnan(contrast_vec);
+    contrast_vec=contrast_vec(sel_ind);
+    rsa.contrast_vec=contrast_vec;
     rsa.rsa_mat=rsa.rsa_mat(sel_ind,:,:);
     %%%%%%%%%%%%
     
