@@ -34,10 +34,7 @@ norm='z_crosstrials';
 
 % downsample to smallest sr
 sr=1000;
-
-
-
-nrand=1000;
+nrand=100;
 
 
 roi.hip_l={'Left-Hippocampus'};
@@ -55,7 +52,7 @@ roi.ventraltempocci={'ctx-lh-fusiform','ctx-lh-inferiortemporal','ctx-lh-lateral
 rois=fieldnames(roi);
 sel_rois=getfield(roi,rois{1});
 sel_rois={sel_rois{:}};
-
+roi=rois{1};
 contrast=contrasts{1};
 
 %%%%%%%%%%%%%%
@@ -88,9 +85,10 @@ end
 % subs with electrodes in this roi
 sel_subs=allsubs(cellfun(@isempty, all_roi_labels(:))==0);
 %preallocate for speed
+
 n_bins=numel(toi(1):slide:(toi(2)-win));
-rand_rsa=zeros(numel(sel_subs),2,nrand,n_bins,n_bins);
-cond_rsa=zeros(numel(sel_subs),2,n_bins,n_bins);
+rsa_ga.rand_rsa=zeros(numel(sel_subs),2,nrand,n_bins,n_bins);
+rsa_ga.cond_rsa=zeros(numel(sel_subs),2,n_bins,n_bins);
 
 for sub=1:length(sel_subs)
     sel_sub=sel_subs{sub};
@@ -124,195 +122,36 @@ for sub=1:length(sel_subs)
     cfg_rsa.toi=toi;
     cfg_rsa.win_pow=win_pow; % in sec, power estimated for every win
     cfg_rsa.win=win; % duration of item
-    cfg_rsa.slide=slide;       
+    cfg_rsa.slide=slide; 
+    cfg_rsa.roi=roi;
     rsa=mcf_timeslidepowrsa(cfg_rsa,data)
     
+    % get condition and rand contrasts
+    cfg_con.generate_rand='yes';
+    cfg_con.nrand=nrand;
+    cfg_con.contrast_mat=contrast_mat;
+    cfg_con.sortind=contrast_def.sortind_org2usedtrlinfo;
+    [rsa_cond]=mcf_rsacontrasts(cfg_con,rsa);
     
-    cfg_rsa.contrast_mat=contrast_mat;
-    cfg_rsa.sortind=contrast_def.sortind_org2usedtrlinfo;
-    sortind=cfg_rsa.sortind;
-    contrast_vec=reshape(cfg_rsa.contrast_mat,[],1);
+    rsa_ga.cond_rsa(sub,:,:,:)=rsa_cond.cond_rsa;
+    rsa_ga.rand_rsa(sub,:,:,:,:)=rsa_cond.rand_rsa;
     
-    % sort rsa to match contrast_mat
-    %     rsa.trialinfo=rsa.trialinfo(sortind,:);
-    rsa.rsa_mat=rsa.rsa_mat(sortind,:,:,:);
-    rsa.rsa_mat=rsa.rsa_mat(:,sortind,:,:);
-    rsa.rsa_mat=reshape(rsa.rsa_mat,[],n_bins,n_bins);
-    
-    % select only non nan trials
-    sel_ind=~isnan(contrast_vec);
-    contrast_vec=contrast_vec(sel_ind);
-    rsa.contrast_vec=contrast_vec;
-    rsa.rsa_mat=rsa.rsa_mat(sel_ind,:,:);
-    %%%%%%%%%%%%
-    
-    % combine data to real avg and random avg
-    cond_rsa(sub,1,:,:)=nanmean(rsa.rsa_mat(rsa.contrast_vec==1,:,:));
-    cond_rsa(sub,2,:,:)=nanmean(rsa.rsa_mat(rsa.contrast_vec==0,:,:));
-    
-    
-    [~,rand_ind]=sort(rand(numel(rsa.contrast_vec),nrand),1);
-    rand_vec=repmat(rsa.contrast_vec,1,nrand);
-    rand_vec=rand_vec(rand_ind);
-    clear rand_ind
-    for i=1:nrand
-        rand_rsa(sub,1,i,:,:)=nanmean(rsa.rsa_mat(rand_vec(:,i)==1,:,:));
-        rand_rsa(sub,2,i,:,:)=nanmean(rsa.rsa_mat(rand_vec(:,i)==0,:,:));
-    end
-    clear rand_vec
     %      save(fullfile(folder_out,strcat(sel_sub,'_rsastat')),'all_stat')
     %  clear all_stat
 end
-rsa.t1=cfg_rsa.t1;
-rsa.t2=cfg_rsa.t2;
-rsa.time=(cfg_rsa.t1+cfg_rsa.t2)./2;
+rsa_ga.time=rsa_cond.time;
+rsa_ga.t1=rsa_cond.t1;
+rsa_ga.t2=rsa_cond.t2;
+rsa_ga.dim_cond='subj_cond_time_time';
+rsa_ga.dim_rand='subj_cond_rand_time_time';
+rsa_ga.roi=rsa_cond.roi;
 
 % run data stats (using ft_freqstats)
-
-data_dummy.label={sel_roi};
-data_dummy.freq=rsa.time;
-data_dummy.time=rsa.time;
-data_dummy.dimord='subj_chan_freq_time';
-data1=data_dummy;
-data1.powspctrm=cond_rsa(:,1,:,:);
-
-data2=data_dummy;
-data2.powspctrm=cond_rsa(:,2,:,:);
-
-% define freqstats
-cfg=[];
-cfg.avgoverchan =  'yes';
-cfg.avgovertime =  'no';
-cfg.avgoverfreq =  'no';
-
-% first level
-cfg.method           = 'montecarlo';
-cfg.numrandomization = nrand;
-cfg.correctm         =  'cluster';
-cfg.correcttail      = 'prob';
-cfg.statistic ='depsamplesT'
-% for within-subjects (depsamplesT)
-Nsub = size(data1.powspctrm,1);                                       %# of subjects?
-design(1,1:2*Nsub)  = [ones(1,Nsub) 2*ones(1,Nsub)];
-design(2,1:2*Nsub)  = [1:Nsub 1:Nsub];
-
-cfg.uvar     = 2;
-cfg.ivar     = 1;
-cfg.design = design;
-stat_data=ft_freqstatistics (cfg,data1,data2);
-clear design
+cfg_stats.nrand=nrand;
+cfg_stats.permutation='yes';
+stats=mcf_rsacondstats(cfg_stats,rsa_ga)
 
 
-% parfor?
-parfor i=1:nrand
-    % run permutation stats (using_ft_freqstats)
-    Nsub = size(rand_rsa,1);
-    data1=data_dummy;
-    data1.powspctrm=reshape(squeeze(rand_rsa(:,1,i,:,:)),Nsub,1,n_bins,n_bins);
-    
-    data2=data_dummy;
-    data2.powspctrm=reshape(squeeze(rand_rsa(:,2,i,:,:)),Nsub,1,n_bins,n_bins);
-    
-    cfg=[];
-    cfg.avgoverchan =  'yes';
-    cfg.avgovertime =  'no';
-    cfg.avgoverfreq =  'no';
-    
-    % first level
-    cfg.method           = 'montecarlo';
-    cfg.numrandomization = 2;
-    cfg.correctm         =  'cluster';
-    cfg.correcttail      = 'prob';
-    cfg.statistic ='depsamplesT'
-    % for within-subjects (depsamplesT)
-    Nsub = size(data1.powspctrm,1);
-    %# of subjects?
-    design=[];
-    design(1,1:2*Nsub)  = [ones(1,Nsub) 2*ones(1,Nsub)];
-    design(2,1:2*Nsub)  = [1:Nsub 1:Nsub];
-    
-    cfg.uvar     = 2;
-    cfg.ivar     = 1;
-    cfg.design = design;
-    stat_rand=ft_freqstatistics (cfg,data1,data2);
-    % get pos/neg clusters for each random
-    rand_pos(i)=0;
-    rand_neg(i)=0;
-    if isfield(stat_rand,'posclusters')
-        if ~isempty(stat_rand.posclusters)
-            rand_pos(i)=stat_rand.posclusters(1).clusterstat;
-        end
-    end
-    if isfield(stat_rand,'negclusters')
-        if ~isempty(stat_rand.negclusters)
-            rand_neg(i)=stat_rand.negclusters(1).clusterstat;
-        end
-    end
-end
-
-
-% check significance
-
-rand_neg=sort(rand_neg,'ascend');
-rand_pos=sort(rand_pos,'descend');
-
-data_pos=0;
-data_neg=0;
-p_pos=1;
-p_neg=1;
-if isfield(stat_data,'posclusters')
-    if ~isempty(stat_data.posclusters)
-        data_pos=[stat_data.posclusters(:).clusterstat];
-        for i=1:numel(data_pos)
-            p_pos(i)=(nearest(rand_pos,data_pos(i))./nrand).*0.5;
-        end
-    end
-end
-if isfield(stat_data,'negclusters')
-    if ~isempty(stat_data.negclusters)
-        data_neg=[stat_data.negclusters(:).clusterstat];
-        for i=1:numel(data_neg)
-            p_neg(i)=(nearest(rand_neg,data_neg(i))./nrand).*0.5;
-        end
-    end
-end
-
-
-if isfield(stat_data,'posclusterslabelmat')
-    maskpos=(stat_data.posclusterslabelmat<=sum(p_pos<0.05)&stat_data.posclusterslabelmat>0);
-else
-    maskpos=zeros(size(stat_data.stat));
-end
-if isfield(stat_data,'negclusterslabelmat')
-    maskneg=(stat_data.negclusterslabelmat<=sum(p_neg<0.05)&stat_data.negclusterslabelmat>0);
-else
-    maskneg=zeros(size(stat_data.stat));
-end
-
-mask=maskpos+maskneg;
-
-fig=figure
-imagesc(stat_data.time,stat_data.time,squeeze(stat_data.stat),[-5 5])
-hold on
-colormap(jet_grey)
-colorbar
-title({[contrast,' in ',sel_roi];['pos tsum:',num2str(data_pos(1)),'p=',num2str(p_pos(1))];['neg tsum:',num2str(data_neg(1)),'p=',num2str(p_neg(1))]})
-ylabel('t in s')
-xlabel('t in s')
-contour(stat_data.time,stat_data.time,squeeze(mask),1,'k')
-set(gca,'YDir','normal')
-% plot results
-path_fig=fullfile( folder_out,'fig');
-savefig(fig,[path_fig,'\',contrast,'_in_',sel_roi,],'compact')
-
-stat_data.trial_rand.p_pos=p_pos;
-stat_data.trial_rand.p_neg=p_neg;
-
-stat_data.trial_rand.rand_pos=rand_pos;
-stat_data.trial_rand.rand_neg=rand_neg;
-save([path_fig,'\',contrast,'_in_',sel_roi,'.mat'],'stat_data')
-close all
-clear stat_data stat_rand rand_pos rand_neg p_pos p_neg data_neg data_pos
 
 
 % first collect all channel for all subjects in a roi
