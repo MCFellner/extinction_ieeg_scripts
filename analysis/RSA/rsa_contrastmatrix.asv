@@ -16,7 +16,7 @@ contrasts={'item_specific','item_specific_block1','item_specific_block2','item_s
             'learn_cond2_block1','learn_cond2_block2','learn_cond2_block3',...
             'learn_cond3_block1','learn_cond3_block2','learn_cond3_block3',...
             'block1','block2','block3',...
-            'first_half_block','second_half',...
+            'first_half_eachblock','second_half_eachblock',...
             'first2second_half_inblock',...
             'trial_slidingavg_def'};
        
@@ -157,22 +157,20 @@ for sub=1:length(allsubs)
         tmp=diag(1:(num_sel_trials-1),-1);
         contrast_mat(sel_trial,sel_trial)=tmp;
         clear tmp sel_trial num_sel_trials
-% all these contrasts need definition        
-%           'first2second_half_inblock',...
-%            'trial_slidingavg_def'};
+
         case {'block1',  'block2', 'block3'}
          def_vec=trlinfo(:,2)==str2double(sel_contrast(end));
         contrast_mat=def_vec*def_vec';
         contrast_mat(contrast_mat==0)=NaN;
         clear def vec
         
-        case {'first_half_block'}    
+        case {'first_half_eachblock'}    
         def_vec=(trlinfo(:,2)<=2 & trlinfo(:,15)<=12)|(trlinfo(:,2)==3 & trlinfo(:,15)<=8);
         contrast_mat=def_vec*def_vec';
         contrast_mat(contrast_mat==0)=NaN;
         clear def vec
         
-        case {'second_half_block'}    
+        case {'second_half_eachblock'}    
         def_vec=(trlinfo(:,2)<=2 & trlinfo(:,15)>12)|(trlinfo(:,2)==3 & trlinfo(:,15)>8);
         contrast_mat=def_vec*def_vec';
         contrast_mat(contrast_mat==0)=NaN;
@@ -186,6 +184,16 @@ for sub=1:length(allsubs)
                   ((trlinfo(:,2)==2)*(trlinfo(:,2)==2)')+...
                   ((trlinfo(:,2)==3)*(trlinfo(:,2)==3)');
         contrast_mat=(def_vec1*def_vec2').*block_mat;
+        
+        case 'trial_slidingavg_def'
+            % here a contrast_mat for every rep is created
+            trlinfo(:,17)=NaN;
+        trlinfo(trlinfo(:,2)==1,17)=trlinfo(trlinfo(:,2)==1,15);
+        trlinfo(trlinfo(:,2)==2,17)=trlinfo(trlinfo(:,2)==2,15)+24;
+        trlinfo(trlinfo(:,2)==3,17)=trlinfo(trlinfo(:,2)==3,15)+48;
+
+        f
+
    end
 
     % add field to contrast_def
