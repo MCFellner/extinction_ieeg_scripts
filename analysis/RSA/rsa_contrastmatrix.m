@@ -185,6 +185,8 @@ for sub=1:length(allsubs)
                     ((trlinfo(:,2)==3)*(trlinfo(:,2)==3)');
                 contrast_mat=(def_vec1*def_vec2').*block_mat;
                 
+                contrast_mat(contrast_mat==0)=NaN;
+                clear def_vec1 def_vec2 block_mat
             case 'trial_slidingavg_def'
                 % here a contrast_mat for every rep is created
                 trlinfo(:,17)=NaN;
@@ -192,14 +194,16 @@ for sub=1:length(allsubs)
                 trlinfo(trlinfo(:,2)==2,17)=trlinfo(trlinfo(:,2)==2,15)+24;
                 trlinfo(trlinfo(:,2)==3,17)=trlinfo(trlinfo(:,2)==3,15)+48;
                 
-                
+                contrast_mat3d=nan(max(trlinfo(:,17))-4,num_trial,num_trial);
                 for i=1:(max(trlinfo(:,17))-4)
                     min_rep=i;
                     max_rep=i+4;
                     def_vec=trlinfo(:,17)>=min_rep & trlinfo(:,17)<=max_rep;
                     contrast_mat3d(i,:,:)=def_vec*def_vec';
                 end
-                contrast_mat=squeeze(sum(contrast_mat3d));
+                contrast_mat3d(contrast_mat3d==0)=NaN;
+
+                contrast_mat=squeeze(nansum(contrast_mat3d,1));
                 
         end
         
