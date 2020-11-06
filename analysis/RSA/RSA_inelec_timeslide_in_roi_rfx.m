@@ -15,7 +15,9 @@ allsubs = {'c_sub01','c_sub02','c_sub03','c_sub04','c_sub05','c_sub06','c_sub07'
     'p_sub01','p_sub02','p_sub03','p_sub04','p_sub05','p_sub06','p_sub07','p_sub08'};
 
 
-contrasts={'type1to2_vs_type2to3_mask_block1_interaction_type1to2_vs_type2to3_mask_block2','item_specific','item_specific_mask_block1','item_specific_mask_block2','item_specific_mask_block3',...
+contrasts={'type1to2_vs_type2to3_mask_block1_interaction_type1to2_vs_type2to3_mask_block2',...
+    'type1to2_vs_type2to3_mask_block1_interaction_type1to2_vs_type2to3_mask_block2',...
+    'item_specific','item_specific_mask_block1','item_specific_mask_block2','item_specific_mask_block3',...
     'cs_specific','cs_specific_mask_block1','cs_specific_mask_block2',...
     'type1to2_vs_type2to3_mask_block1','type1to2_vs_type2to3_mask_block2','type1to2_vs_type2to3_mask_block3'};
 
@@ -35,7 +37,7 @@ norm='z_crosstrials';
 
 % downsample to smallest sr
 sr=1000;
-nrand=100;
+nrand=1000;
 
 
 all_roi.hip_l={'Left-Hippocampus'};

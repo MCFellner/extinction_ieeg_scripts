@@ -32,13 +32,13 @@ rsa.rsa_mat=rsa.rsa_mat(sel_ind,:,:);
 num_cond=max(contrast_vec);
 cond_rsa=zeros(num_cond,size(rsa.rsa_mat,2),size(rsa.rsa_mat,3));
 for c=1:num_cond
-    cond_rsa(c,:,:)=nanmean(rsa.rsa_mat(rsa.contrast_vec==c,:,:));
+cond_rsa(c,:,:)=nanmean(rsa.rsa_mat(rsa.contrast_vec==c,:,:));
 end
 
 if num_cond==4
-    tmp(1,:,:)=cond_rsa(1,:,:)-cond_rsa(2,:,:);
-    tmp(2,:,:)=cond_rsa(3,:,:)-cond_rsa(4,:,:);
-    cond_rsa=tmp;
+tmp(1,:,:)=cond_rsa(1,:,:)-cond_rsa(2,:,:);
+tmp(2,:,:)=cond_rsa(3,:,:)-cond_rsa(4,:,:);
+cond_rsa=tmp;
 else
 end
 
@@ -52,17 +52,10 @@ switch cfg_con.generate_rand
         rand_vec=rand_vec(rand_ind);
         clear rand_ind
         for i=1:nrand
-            for c=1:num_cond
-                rand_rsa(c,i,:,:)=nanmean(rsa.rsa_mat(rand_vec(:,i)==c,:,:));
-            end
+            rand_rsa(1,i,:,:)=nanmean(rsa.rsa_mat(rand_vec(:,i)==1,:,:));
+            rand_rsa(2,i,:,:)=nanmean(rsa.rsa_mat(rand_vec(:,i)==0,:,:));
         end
         clear rand_vec
-        if num_cond==4
-            tmp(1,:,:)=rand_rsa(1,:,:)-rand_rsa(2,:,:);
-            tmp(2,:,:)=rand_rsa(3,:,:)-rand_rsa(4,:,:);
-            rand_rsa=tmp;
-        else
-        end
         rsa_cond.rand_rsa=rand_rsa;
     otherwise
 end
