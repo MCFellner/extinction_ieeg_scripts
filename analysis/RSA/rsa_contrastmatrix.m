@@ -18,6 +18,9 @@ contrasts={'item_specific',...
     'in_block','all',...
     'block1','block2','block3',...
     'first_half_eachblock','second_half_eachblock',...
+        'first_half_block1','second_half_block1',...
+        'first_half_block2','second_half_block2',...
+        'first_half_block3','second_half_block3',...
     'first2second_half_inblock',...
     'trial_slidingavg_def'};
 
@@ -161,12 +164,34 @@ for sub=1:length(allsubs)
                 contrast_mat=contrast_mat+(def_vec*def_vec');
                 contrast_mat(contrast_mat==0)=NaN;
                 clear def vec
-                
+            case {'first_half_block1','first_half_block2'}
+                 def_vec=(trlinfo(:,2)==str2double(sel_contrast(end)) & trlinfo(:,15)<=12);
+                contrast_mat=contrast_mat+(def_vec*def_vec');
+                contrast_mat(contrast_mat==0)=NaN;
+                clear def vec 
+ 
             case {'second_half_eachblock'}
                 def_vec=(trlinfo(:,2)<=2 & trlinfo(:,15)>12)|(trlinfo(:,2)==3 & trlinfo(:,15)>8);
                 contrast_mat=contrast_mat+(def_vec*def_vec');
                 contrast_mat(contrast_mat==0)=NaN;
                 clear def vec
+                
+                
+            case {'second_half_block1','second_half_block2'}
+                 def_vec=(trlinfo(:,2)==str2double(sel_contrast(end)) & trlinfo(:,15)>12);
+                contrast_mat=contrast_mat+(def_vec*def_vec');
+                contrast_mat(contrast_mat==0)=NaN;
+                clear def vec  
+            case {'first_half_block3'}
+                 def_vec=(trlinfo(:,2)==3) & trlinfo(:,15)<=8);
+                contrast_mat=contrast_mat+(def_vec*def_vec');
+                contrast_mat(contrast_mat==0)=NaN;
+                clear def vec     
+            case {'second_half_block3'}
+                 def_vec=(trlinfo(:,2)==3) & trlinfo(:,15)>8);
+                contrast_mat=contrast_mat+(def_vec*def_vec');
+                contrast_mat(contrast_mat==0)=NaN;
+                clear def vec      
                 
             case {'first2second_half_inblock'}
                 def_vec1=(trlinfo(:,2)<=2 & trlinfo(:,15)<=12)|(trlinfo(:,2)==3 & trlinfo(:,15)<=8);
