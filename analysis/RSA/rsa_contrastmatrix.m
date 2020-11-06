@@ -15,6 +15,7 @@ contrasts={'item_specific',...
     'learn_cond1',...
     'learn_cond2',...
     'learn_cond3',...
+    'in_block','all',...
     'block1','block2','block3',...
     'first_half_eachblock','second_half_eachblock',...
     'first2second_half_inblock',...
@@ -128,6 +129,18 @@ for sub=1:length(allsubs)
                 tmp=diag(1:(num_sel_trials-1),-1);
                 contrast_mat(sel_trial,sel_trial)=tmp;
                 clear tmp sel_trial num_sel_trials
+             case 'in_block'
+                def_vec=trlinfo(:,2)==1;
+                contrast_mat1=def_vec*def_vec';
+                def_vec=trlinfo(:,2)==2;
+                contrast_mat2=def_vec*def_vec';
+                   def_vec=trlinfo(:,2)==3;
+                contrast_mat3=def_vec*def_vec';
+                contrast_mat=contrast_mat1+contrast_mat2+contrast_mat3;
+                contrast_mat(contrast_mat==0)=NaN;
+                clear def vec contrast_mat1 contrast_mat2 contrast_mat3
+            case 'all'
+                contrast_mat=ones(1,1)
                 
             case {'block1',  'block2', 'block3'}
                 def_vec=trlinfo(:,2)==str2double(sel_contrast(end));
