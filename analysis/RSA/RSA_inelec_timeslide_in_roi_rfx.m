@@ -15,20 +15,11 @@ allsubs = {'c_sub01','c_sub02','c_sub03','c_sub04','c_sub05','c_sub06','c_sub07'
     'p_sub01','p_sub02','p_sub03','p_sub04','p_sub05','p_sub06','p_sub07','p_sub08'};
 
 
-contrasts={'item_specific','item_specific_block1','item_specific_block2','item_specific_block3',...
-    'cs_specific','cs_specific_block1','cs_specific_block2',...
-    'type1to2_vs_type2to3_block1','type1to2_vs_type2to3_block2'};
+contrasts={'type1to2_vs_type2to3_mask_block1_interaction_type1to2_vs_type2to3_mask_block2','item_specific','item_specific_mask_block1','item_specific_mask_block2','item_specific_mask_block3',...
+    'cs_specific','cs_specific_mask_block1','cs_specific_mask_block2',...
+    'type1to2_vs_type2to3_mask_block1','type1to2_vs_type2to3_mask_block2','type1to2_vs_type2to3_mask_block3'};
 
-contrasts={'item_specific',...
-    'cs_specific',...
-    'type1to2_vs_type2to3',...
-    'learn_cond1',...
-    'learn_cond2',...
-    'learn_cond3',...
-    'block1','block2','block3',...
-    'first_half_eachblock','second_half_eachblock',...
-    'first2second_half_inblock',...
-    'trial_slidingavg_def'};
+
 
 % segment data in different trial parts
 % item window: -1 to 4 (imp
@@ -61,12 +52,12 @@ all_roi.ventraltempocci={'ctx-lh-fusiform','ctx-lh-inferiortemporal','ctx-lh-lat
 rois=fieldnames(all_roi);
 
 for cons=1:numel(contrasts)
+            contrast=contrasts{cons};
+
     for r=1:numel(rois)
-        sel_rois={sel_rois{:}};
         roi=rois{r};
         sel_rois=getfield(all_roi,roi);
         
-        contrast=contrasts{1};
         
         %%%%%%%%%%%%%%
         load('D:\matlab_tools\jet_grey.mat')
@@ -107,7 +98,9 @@ for cons=1:numel(contrasts)
             sel_sub=sel_subs{sub};
             sub_ind=find(strcmp(sel_sub,allsubs));
             load(fullfile(path_designmat,strcat(sel_sub,'_contrast_mat_sym')))
-            contrast_mat=getfield(contrast_def,contrast);
+            %contrast_mat=getfield(contrast_def,contrast);
+            contrast_mat=mcf_contrastmatdef(contrast_def,contrast);
+            
             
             % electrodeinfo
             info_file=strcat(path_info,sel_sub,'_datainfo');
