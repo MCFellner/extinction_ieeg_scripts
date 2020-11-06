@@ -58,8 +58,8 @@ switch cfg_con.generate_rand
         end
         clear rand_vec
         if num_cond==4
-            tmp(1,:,:,:)=rand_rsa(1,:,:)-rand_rsa(2,:,:,:);
-            tmp(2,:,:,:)=rand_rsa(3,:,:)-rand_rsa(4,:,:,:);
+            tmp(1,:,:,:)=rand_rsa(1,:,:,:)-rand_rsa(2,:,:,:);
+            tmp(2,:,:,:)=rand_rsa(3,:,:,:)-rand_rsa(4,:,:,:);
             rand_rsa=tmp;
         else
         end
