@@ -9,12 +9,12 @@ path_out='D:\Extinction\iEEG\analysis\rsa\contrast_mat\';
 mkdir(path_out)
 path_figs=fullfile(path_out,'figs')
 mkdir(path_figs)
-contrasts={'item_specific','item_specific_block1','item_specific_block2','item_specific_block3',...
-    'cs_specific','cs_specific_block1','cs_specific_block2',...
-    'type1to2_vs_type2to3_block1','type1to2_vs_type2to3_block2',...
-    'learn_cond1_block1','learn_cond1_block2','learn_cond1_block3',...
-    'learn_cond2_block1','learn_cond2_block2','learn_cond2_block3',...
-    'learn_cond3_block1','learn_cond3_block2','learn_cond3_block3',...
+contrasts={'item_specific',...
+    'cs_specific',...
+    'type1to2_vs_type2to3',...
+    'learn_cond1',...
+    'learn_cond2',...
+    'learn_cond3',...
     'block1','block2','block3',...
     'first_half_eachblock','second_half_eachblock',...
     'first2second_half_inblock',...
@@ -76,22 +76,7 @@ for sub=1:length(allsubs)
                 end
                 clear tmp tmp_mat
                 
-            case {'item_specific_block1','item_specific_block2','item_specific_block3'}
-                % exclude other blocks
-                nan_col=trlinfo(:,2)~=str2double(sel_contrast(end));
-                nan_mat=contrast_mat;
-                nan_mat(nan_col,:)=nan;
-                nan_mat(:,nan_col)=nan;
-                
-                sel_col=trlinfo(:,6);
-                all_cat=unique(sel_col);
-                for i=1:numel(all_cat)
-                    tmp=sel_col==all_cat(i);
-                    tmp_mat=tmp*tmp';
-                    contrast_mat=contrast_mat+tmp_mat;
-                end
-                contrast_mat=contrast_mat+nan_mat;
-                clear tmp tmp_mat nan_mat nan_col
+         
                 
             case  'cs_specific'
                 % exclude other block 3
@@ -110,27 +95,13 @@ for sub=1:length(allsubs)
                 contrast_mat=contrast_mat+nan_mat;
                 clear tmp tmp_mat nan_mat nan_col
                 
-            case {'cs_specific_block1','cs_specific_block2'}
-                % exclude other blocks
-                nan_col=trlinfo(:,2)~=str2double(sel_contrast(end));
-                nan_mat=contrast_mat;
-                nan_mat(nan_col,:)=nan;
-                nan_mat(:,nan_col)=nan;
-                sel_col=trlinfo(:,8)+1;
-                all_cat=unique(sel_col);
-                for i=1:numel(all_cat)
-                    tmp=sel_col==all_cat(i);
-                    tmp_mat=tmp*tmp';
-                    contrast_mat=contrast_mat+tmp_mat;
-                end
-                contrast_mat=contrast_mat+nan_mat;
-                clear tmp tmp_mat nan_mat nan_col
+           
                 
-            case  {'type1to2_vs_type2to3_block1','type1to2_vs_type2to3_block2'}
-                nan_col=trlinfo(:,2)~=str2double(sel_contrast(end));
-                nan_mat=contrast_mat;
-                nan_mat(nan_col,:)=nan;
-                nan_mat(:,nan_col)=nan;
+            case  {'type1to2_vs_type2to3'}
+%                 nan_col=trlinfo(:,2)~=str2double(sel_contrast(end));
+%                 nan_mat=contrast_mat;
+%                 nan_mat(nan_col,:)=nan;
+%                 nan_mat(:,nan_col)=nan;
                 
                 col_1=trlinfo(:,6)==1;
                 col_2=trlinfo(:,6)==2;
@@ -142,16 +113,16 @@ for sub=1:length(allsubs)
                 tmp(tmp==0)=NaN;
                 tmp(tmp==2)=0;
                 
-                contrast_mat=tmp+contrast_mat+nan_mat;
-                clear tmp1 tmp2 tmp3 nan_mat col_1 col_2 col_3  nan_col
+                contrast_mat=tmp+contrast_mat;%+nan_mat;
+                clear tmp1 tmp2 tmp3  col_1 col_2 col_3  nan_col
                 
-            case  {'learn_cond1_block1','learn_cond1_block2','learn_cond1_block3',...
-                    'learn_cond2_block1','learn_cond2_block2','learn_cond2_block3',...
-                    'learn_cond3_block1','learn_cond3_block2','learn_cond3_block3'}
+            case  {'learn_cond1',...
+                    'learn_cond2',...
+                    'learn_cond3',}
                 contrast_mat=nan(num_trial);
                 % matrix for learning curves: correlate in each cond consecutive
                 % trials (i.e. one of the diagonal
-                sel_trial=trlinfo(:,6)==str2double(sel_contrast(11))&trlinfo(:,2)==str2double(sel_contrast(end));
+                sel_trial=trlinfo(:,6)==str2double(sel_contrast(11));
                 num_sel_trials=sum(sel_trial);
                 
                 tmp=diag(1:(num_sel_trials-1),-1);

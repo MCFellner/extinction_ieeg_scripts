@@ -2,7 +2,7 @@ addpath('D:\matlab_tools\fieldtrip-20200130')
 ft_defaults
 addpath('D:\Extinction\iEEG\extinction_ieeg_scripts\additional_functions')
 
-%% rsa for iEEG
+%% average rsa values for contrasts
 
 path_info='D:\Extinction\iEEG\data\preproc\ieeg\datainfo\';
 path_preproc='D:\Extinction\iEEG\data\preproc\ieeg\readin\';
@@ -18,6 +18,12 @@ allsubs = {'c_sub01','c_sub02','c_sub03','c_sub04','c_sub05','c_sub06','c_sub07'
 contrasts={'item_specific','item_specific_block1','item_specific_block2','item_specific_block3',...
     'cs_specific','cs_specific_block1','cs_specific_block2',...
     'type1to2_vs_type2to3_block1','type1to2_vs_type2to3_block2'};
+
+ mask=   {'block1','block2','block3',...
+    'first_half_eachblock','second_half_eachblock',...
+    'first2second_half_inblock',...
+    'trial_slidingavg_def'};
+
 
 % segment data in different trial parts
 % item window: -1 to 4 (imp
@@ -115,7 +121,7 @@ for cons=1:numel(contrasts)
             cfg_preproc.channel     = all_roi_labels{sub_ind};
             cfg_preproc.trialinfo=datainfo.trialinfo;
             data=mcf_preproc(cfg_preproc, data);
-            clear cfg_preproc
+            clear cfg_preproc trl
             
             % defintion for features
             cfg_rsa.freqdef=pow_feature;
