@@ -123,11 +123,19 @@ for sub=1:length(allsubs)
                 contrast_mat=nan(num_trial);
                 % matrix for learning curves: correlate in each cond consecutive
                 % trials (i.e. one of the diagonal
+                  trlinfo(:,17)=NaN;
+                trlinfo(trlinfo(:,2)==1,17)=trlinfo(trlinfo(:,2)==1,15);
+                trlinfo(trlinfo(:,2)==2,17)=trlinfo(trlinfo(:,2)==2,15)+24;
+                trlinfo(trlinfo(:,2)==3,17)=trlinfo(trlinfo(:,2)==3,15)+48;
                 sel_trial=trlinfo(:,6)==str2double(sel_contrast(11));
-                num_sel_trials=sum(sel_trial);
+                num_sel_trials=trlinfo(sel_trial,17);
                 
-                tmp=diag(1:(num_sel_trials-1),-1);
+                
+                tmp=diag(num_sel_trials(2:end),-1);
                 contrast_mat(sel_trial,sel_trial)=tmp;
+                contrast_mat(contrast_mat==0)=NaN;
+
+                
                 clear tmp sel_trial num_sel_trials
              case 'in_block'
                 def_vec=trlinfo(:,2)==1;
@@ -140,7 +148,7 @@ for sub=1:length(allsubs)
                 contrast_mat(contrast_mat==0)=NaN;
                 clear def vec contrast_mat1 contrast_mat2 contrast_mat3
             case 'all'
-                contrast_mat=ones(1,1)
+                contrast_mat=ones(num_trial,num_trial);
                 
             case {'block1',  'block2', 'block3'}
                 def_vec=trlinfo(:,2)==str2double(sel_contrast(end));
