@@ -183,12 +183,12 @@ for sub=1:length(allsubs)
                 contrast_mat(contrast_mat==0)=NaN;
                 clear def vec  
             case {'first_half_block3'}
-                 def_vec=(trlinfo(:,2)==3) & trlinfo(:,15)<=8);
+                 def_vec=(trlinfo(:,2)==3) & trlinfo(:,15)<=8;
                 contrast_mat=contrast_mat+(def_vec*def_vec');
                 contrast_mat(contrast_mat==0)=NaN;
                 clear def vec     
             case {'second_half_block3'}
-                 def_vec=(trlinfo(:,2)==3) & trlinfo(:,15)>8);
+                 def_vec=(trlinfo(:,2)==3) & trlinfo(:,15)>8;
                 contrast_mat=contrast_mat+(def_vec*def_vec');
                 contrast_mat(contrast_mat==0)=NaN;
                 clear def vec      
