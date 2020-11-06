@@ -148,7 +148,7 @@ for sub=1:length(allsubs)
                 contrast_mat(contrast_mat==0)=NaN;
                 clear def vec contrast_mat1 contrast_mat2 contrast_mat3
             case 'all'
-                contrast_mat=ones(num_trial,num_trial);
+                contrast_mat=contrast_mat+(ones(num_trial,num_trial));
                 
             case {'block1',  'block2', 'block3'}
                 def_vec=trlinfo(:,2)==str2double(sel_contrast(end));
@@ -158,13 +158,13 @@ for sub=1:length(allsubs)
                 
             case {'first_half_eachblock'}
                 def_vec=(trlinfo(:,2)<=2 & trlinfo(:,15)<=12)|(trlinfo(:,2)==3 & trlinfo(:,15)<=8);
-                contrast_mat=def_vec*def_vec';
+                contrast_mat=contrast_mat+(def_vec*def_vec');
                 contrast_mat(contrast_mat==0)=NaN;
                 clear def vec
                 
             case {'second_half_eachblock'}
                 def_vec=(trlinfo(:,2)<=2 & trlinfo(:,15)>12)|(trlinfo(:,2)==3 & trlinfo(:,15)>8);
-                contrast_mat=def_vec*def_vec';
+                contrast_mat=contrast_mat+(def_vec*def_vec');
                 contrast_mat(contrast_mat==0)=NaN;
                 clear def vec
                 
@@ -175,7 +175,7 @@ for sub=1:length(allsubs)
                 block_mat=((trlinfo(:,2)==1)*(trlinfo(:,2)==1)')+...
                     ((trlinfo(:,2)==2)*(trlinfo(:,2)==2)')+...
                     ((trlinfo(:,2)==3)*(trlinfo(:,2)==3)');
-                contrast_mat=(def_vec1*def_vec2').*block_mat;
+                contrast_mat=contrast_mat+((def_vec1*def_vec2').*block_mat);
                 
                 contrast_mat(contrast_mat==0)=NaN;
                 clear def_vec1 def_vec2 block_mat
@@ -191,7 +191,7 @@ for sub=1:length(allsubs)
                     min_rep=i;
                     max_rep=i+4;
                     def_vec=trlinfo(:,17)>=min_rep & trlinfo(:,17)<=max_rep;
-                    contrast_mat3d(i,:,:)=def_vec*def_vec';
+                    contrast_mat3d(i,:,:)=contrast_mat+(def_vec*def_vec');
                 end
                 contrast_mat3d(contrast_mat3d==0)=NaN;
 
