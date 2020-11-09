@@ -9,7 +9,7 @@ vs_con=strfind(contrast,'_interaction_');
 
 % seperate contrasts incase of vs
 if isempty(vs_con)
-      all_contrasts{:}=constrast;
+      all_contrasts{:}=contrast;
 else
    % seperate contrasts
     all_contrasts{1}=contrast(1:vs_con-1);
@@ -39,9 +39,15 @@ if c==2
 elseif c>2
     error('contrasts between more than two contrasts not defined')
 else
+   all_contrast_mat{c}=2-all_contrast_mat{c};    
+
 end
 contrast_mat(c,:,:)=all_contrast_mat{c};
 nan_masks(c,:,:)=isnan(all_contrast_mat{c});
 end
-nan_masks=ssum()
+if c>1
+nan_masks=squeeze(sum(nan_masks,1))==c;
 contrast_mat=squeeze(nansum(contrast_mat));
+else
+nan_masks=squeeze(nan_masks,1)==c;
+contrast_mat=squeeze(nansum(contrast_mat));end

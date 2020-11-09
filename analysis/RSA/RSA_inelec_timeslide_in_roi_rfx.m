@@ -21,7 +21,8 @@ contrasts={'type1to2_vs_type2to3_mask_block1_interaction_type1to2_vs_type2to3_ma
         'type1to2_vs_type2to3_mask_first_half_block2_interaction_type1to2_vs_type2to3_mask_second_half_block2',...
         'item_specific_mask_first_half_block1_interaction_item_specific_mask_second_half_block1',...
         'item_specific_mask_first_half_block2_interaction_item_specific_mask_second_half_block2',...
-    'item_specific','item_specific_mask_block1','item_specific_mask_block2','item_specific_mask_block3',...
+            'item_specific_mask_first_half_block3_interaction_item_specific_mask_second_half_block3',...
+        'item_specific','item_specific_mask_block1','item_specific_mask_block2','item_specific_mask_block3',...
     'cs_specific','cs_specific_mask_block1','cs_specific_mask_block2',...
     'type1to2_vs_type2to3_mask_block1','type1to2_vs_type2to3_mask_block2','type1to2_vs_type2to3_mask_block3'};
 
@@ -57,7 +58,7 @@ all_roi.ventraltempocci={'ctx-lh-fusiform','ctx-lh-inferiortemporal','ctx-lh-lat
 %roi.ventraltempocci_r={'ctx-rh-fusiform','ctx-rh-inferiortemporal','ctx-rh-lateraloccipital','ctx-rh-lingual','ctx-rh-middletemporal','ctx-rh-parahippocampal','ctx-rh-temporalpole'};
 rois=fieldnames(all_roi);
 
-for cons=1:numel(contrasts)
+for cons=8:numel(contrasts)
             contrast=contrasts{cons};
 
     for r=1:numel(rois)
@@ -175,6 +176,7 @@ for cons=1:numel(contrasts)
         contour(stats.time,stats.time,squeeze(stats.trial_rand.mask),1,'k')
         set(gca,'YDir','normal')
         path_fig=fullfile( folder_out,'fig');
+        mkdir(path_fig)
         savefig(fig,[path_fig,'\',contrast,'_in_',roi],'compact')
         
         save([path_fig,'\',contrast,'_in_',roi,'.mat'],'stats')

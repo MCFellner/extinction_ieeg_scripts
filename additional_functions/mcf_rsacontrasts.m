@@ -39,6 +39,7 @@ if num_cond==4
     tmp(1,:,:)=cond_rsa(1,:,:)-cond_rsa(2,:,:);
     tmp(2,:,:)=cond_rsa(3,:,:)-cond_rsa(4,:,:);
     cond_rsa=tmp;
+    clear tmp
 else
 end
 
