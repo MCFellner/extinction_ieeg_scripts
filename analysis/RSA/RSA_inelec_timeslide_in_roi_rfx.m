@@ -15,7 +15,10 @@ allsubs = {'c_sub01','c_sub02','c_sub03','c_sub04','c_sub05','c_sub06','c_sub07'
     'p_sub01','p_sub02','p_sub03','p_sub04','p_sub05','p_sub06','p_sub07','p_sub08'};
 
 
-contrasts={'type1to2_vs_type2to3_mask_block1_interaction_type1to2_vs_type2to3_mask_block2',...
+contrasts={'item_specific_mask_block1_interaction_item_specific_mask_block2',...
+        'item_specific_mask_block1_interaction_item_specific_mask_block3',...
+         'item_specific_mask_block2_interaction_item_specific_mask_block3',...       
+    'type1to2_vs_type2to3_mask_block1_interaction_type1to2_vs_type2to3_mask_block2',...
     'type1to2_vs_type2to3_mask_block1_interaction_type1to2_vs_type2to3_mask_block2',...
         'type1to2_vs_type2to3_mask_first_half_block1_interaction_type1to2_vs_type2to3_mask_second_half_block1',...
         'type1to2_vs_type2to3_mask_first_half_block2_interaction_type1to2_vs_type2to3_mask_second_half_block2',...
@@ -58,7 +61,7 @@ all_roi.ventraltempocci={'ctx-lh-fusiform','ctx-lh-inferiortemporal','ctx-lh-lat
 %roi.ventraltempocci_r={'ctx-rh-fusiform','ctx-rh-inferiortemporal','ctx-rh-lateraloccipital','ctx-rh-lingual','ctx-rh-middletemporal','ctx-rh-parahippocampal','ctx-rh-temporalpole'};
 rois=fieldnames(all_roi);
 
-for cons=8:numel(contrasts)
+for cons=1:3%:numel(contrasts)
             contrast=contrasts{cons};
 
     for r=1:numel(rois)
@@ -170,7 +173,7 @@ for cons=8:numel(contrasts)
         hold on
         colormap(jet_grey)
         colorbar
-        title({[contrast,' in ',roi];['pos tsum:',num2str(stats.trial_rand.data_pos(1)),'p=',num2str(stats.trial_rand.p_pos(1))];['neg tsum:',num2str(stats.trial_rand.data_neg(1)),'p=',num2str(stats.trial_rand.p_neg(1))]})
+        title({[contrast];[roi];['pos tsum:',num2str(stats.trial_rand.data_pos(1)),'p=',num2str(stats.trial_rand.p_pos(1))];['neg tsum:',num2str(stats.trial_rand.data_neg(1)),'p=',num2str(stats.trial_rand.p_neg(1))]})
         ylabel('t in s')
         xlabel('t in s')
         contour(stats.time,stats.time,squeeze(stats.trial_rand.mask),1,'k')
