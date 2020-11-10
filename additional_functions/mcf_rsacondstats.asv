@@ -2,15 +2,8 @@
 
 % cfg_stats.nrand=nrand;
 % cfg_stats.permutation='yes';
-% cfg_stats.twosidedtest='yes'
-function [stats]=mcf_rsacondstats(cfg_stats,rsa_ga)
-switch cfg_stats.twosidedtest
-    case 'yes'
-        p_cluster=0.025;
-    case
-        p_cluster=0.05;
-end
 
+function [stats]=mcf_rsacondstats(cfg_stats,rsa_ga)
 n_bins=numel(rsa_ga.time);
 nrand=cfg_stats.nrand;
 
@@ -110,7 +103,7 @@ switch cfg_stats.permutation
             if ~isempty(stats.posclusters)
                 data_pos=[stats.posclusters(:).clusterstat];
                 for i=1:numel(data_pos)
-                    p_pos(i)=(nearest(rand_pos,data_pos(i))./nrand);
+                    p_pos(i)=(nearest(rand_pos,data_pos(i))./nrand).*2;
                 end
             end
         end
@@ -118,19 +111,19 @@ switch cfg_stats.permutation
             if ~isempty(stats.negclusters)
                 data_neg=[stats.negclusters(:).clusterstat];
                 for i=1:numel(data_neg)
-                    p_neg(i)=(nearest(rand_neg,data_neg(i))./nrand);
+                    p_neg(i)=(nearest(rand_neg,data_neg(i))./nrand).*2;
                 end
             end
         end
         
         
         if isfield(stats,'posclusterslabelmat')
-            maskpos=(stats.posclusterslabelmat<=sum(p_pos<p_cluster)&stats.posclusterslabelmat>0);
+            maskpos=(stats.posclusterslabelmat<=sum(p_pos<0.05)&stats.posclusterslabelmat>0);
         else
             maskpos=zeros(size(stats.stat));
         end
         if isfield(stats,'negclusterslabelmat')
-            maskneg=(stats.negclusterslabelmat<=sum(p_neg<p_cluster)&stats.negclusterslabelmat>0);
+            maskneg=(stats.negclusterslabelmat<=sum(p_neg<0.05)&stats.negclusterslabelmat>0);
         else
             maskneg=zeros(size(stats.stat));
         end

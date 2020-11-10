@@ -165,6 +165,8 @@ for cons=1:3%:numel(contrasts)
         % run data stats (using ft_freqstats)
         cfg_stats.nrand=nrand;
         cfg_stats.permutation='yes';
+        cfg_stats.twosidedtest='yes'
+
         stats=mcf_rsacondstats(cfg_stats,rsa_ga)
         
         % plot result
