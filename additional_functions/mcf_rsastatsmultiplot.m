@@ -13,12 +13,12 @@
 
 
 
-function mcf_rsastatsmultiplot(cfg_plot)
+function [fig]= mcf_rsastatsmultiplot(cfg_plot)
 contrast=cfg_plot.contrast;
 roi=cfg_plot.roi;
 path_stats=cfg_plot.path_stats;
 
-if strcmp(contrast,'*')&strcmp(roi,'*')
+if strcmp(roi,'*')
     all_files=dir(fullfile(path_stats,[contrast,'\fig\',roi,'.mat']));    
 else
     all_files=dir(fullfile(path_stats,[contrast,'\fig\*',roi,'.mat']));

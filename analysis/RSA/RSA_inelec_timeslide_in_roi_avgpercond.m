@@ -29,7 +29,7 @@ contrasts={'item_specific','item_specific_block1','item_specific_block2','item_s
 % item window: -1 to 4 (imp
 pre_item=-1;
 post_item=5.5;
-toi=[2 4];
+toi=[2 3.8];
 win_pow=0.05; % in sec, power estimated for every win
 win=0.200; % duration of item
 slide=0.05;

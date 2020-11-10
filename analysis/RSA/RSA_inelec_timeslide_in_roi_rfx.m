@@ -35,7 +35,7 @@ contrasts={'item_specific_mask_block1_interaction_item_specific_mask_block2',...
 % item window: -1 to 4 (imp
 pre_item=-1;
 post_item=5.5;
-toi=[2 4];
+toi=[2 3.8];
 win_pow=0.05; % in sec, power estimated for every win
 win=0.200; % duration of item
 slide=0.05;
@@ -61,7 +61,7 @@ all_roi.ventraltempocci={'ctx-lh-fusiform','ctx-lh-inferiortemporal','ctx-lh-lat
 %roi.ventraltempocci_r={'ctx-rh-fusiform','ctx-rh-inferiortemporal','ctx-rh-lateraloccipital','ctx-rh-lingual','ctx-rh-middletemporal','ctx-rh-parahippocampal','ctx-rh-temporalpole'};
 rois=fieldnames(all_roi);
 
-for cons=1:3%:numel(contrasts)
+for cons=11:numel(contrasts)
             contrast=contrasts{cons};
 
     for r=1:numel(rois)
