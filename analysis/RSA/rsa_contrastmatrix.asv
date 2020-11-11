@@ -206,7 +206,11 @@ for sub=1:length(allsubs)
                 contrast_mat(contrast_mat==0)=NaN;
                 clear def_vec1 def_vec2 block_mat
             case 'no_ustrials'    
+               def_vec=trlinfo(:,9)==0;
+                contrast_mat=contrast_mat+(def_vec*def_vec');
                 
+                contrast_mat(contrast_mat==0)=NaN;
+                clear def_vec
             case 'trial_slidingavg_def'
                 % here a contrast_mat for every rep is created
                 trlinfo(:,17)=NaN;
