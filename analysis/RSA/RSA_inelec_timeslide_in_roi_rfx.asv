@@ -59,8 +59,7 @@ nrand=1000;
 % all_roi.amy_l={'Left-Amygdala'};
 % all_roi.ventraltempocci={'ctx-lh-fusiform','ctx-lh-inferiortemporal','ctx-lh-lateraloccipital','ctx-lh-lingual','ctx-lh-middletemporal','ctx-lh-parahippocampal','ctx-lh-temporalpole','ctx-rh-fusiform','ctx-rh-inferiortemporal','ctx-rh-lateraloccipital','ctx-rh-lingual','ctx-rh-middletemporal','ctx-rh-parahippocampal','ctx-rh-temporalpole'};
 % %roi.ventraltempocci_r={'ctx-rh-fusiform','ctx-rh-inferiortemporal','ctx-rh-lateraloccipital','ctx-rh-lingual','ctx-rh-middletemporal','ctx-rh-parahippocampal','ctx-rh-temporalpole'};
-%all_roi.amy={'Left-Amygdala','Right-Amygdala'};
-all_roi.hip={'Right-Hippocampus','Left-Hippocampus'};
+all_roi.amy={'Left-Amygdala','Right-Amygdala'};
 
 
 rois=fieldnames(all_roi);

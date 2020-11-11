@@ -7,7 +7,7 @@ function [stats]=mcf_rsacondstats(cfg_stats,rsa_ga)
 switch cfg_stats.twosidedtest
     case 'yes'
         p_cluster=0.025;
-    case
+    case 'no'
         p_cluster=0.05;
 end
 
