@@ -1073,10 +1073,13 @@ end
 path_info='D:\Extinction\iEEG\data\preproc\ieeg\datainfo\';
 path_templates='D:\matlab_tools\fieldtrip-20200130\template\atlas\';
 path_figs='D:\Extinction\iEEG\data\preproc\ieeg\datainfo\figure\';
-sel_regions={'Amygdala_L','Hippocampus_L'};
+
+% aal region def
+%sel_regions={'Amygdala_L','Hippocampus_L'};
 %sel_regions={'Rectus_L','Frontal_Sup_Orb_L','Frontal_Med_Orb_L'};
 %sel_regions={'Amygdala_R','Hippocampus_R','Rectus_R','Frontal_Sup_Orb_R','Frontal_Med_Orb_R'};
 %sel_regions={'Amygdala_L','Hippocampus_L','Rectus_L','Frontal_Sup_Orb_L','Frontal_Med_Orb_L'};
+
 % all_roi.hip_l={'Left-Hippocampus'};
 % all_roi.hip_r={'Right-Hippocampus'};
 % all_roi.vmpfc={'ctx-lh-lateralorbitofrontal','ctx-lh-medialorbitofrontal','ctx-rh-lateralorbitofrontal','ctx-rh-medialorbitofrontal'};
@@ -1090,16 +1093,27 @@ sel_regions={'Amygdala_L','Hippocampus_L'};
 % %roi.ventraltempocci_r={'ctx-rh-fusiform','ctx-rh-inferiortemporal','ctx-rh-lateraloccipital','ctx-rh-lingual','ctx-rh-middletemporal','ctx-rh-parahippocampal','ctx-rh-temporalpole'};
 %all_roi.amy={'Left-Amygdala','Right-Amygdala'};
 
+sel_regions={'Left-Amygdala','Left-Hippocampus','ctx-lh-lateralorbitofrontal','ctx-lh-medialorbitofrontal'};
+sel_color= [1,0,0;0,1,0;0,0,1;0,0,1];%rgb value for each region
+
+% sel_regions={'ctx-lh-fusiform','ctx-lh-inferiortemporal','ctx-lh-lateraloccipital',...
+%     'ctx-lh-lingual','ctx-lh-middletemporal','ctx-lh-parahippocampal','ctx-lh-temporalpole',...
+%     'ctx-lh-rostralmiddlefrontal','ctx-lh-caudalmiddlefrontal'};
+% sel_color= [1,1,0;1,1,0;1,1,0;...
+%     1,1,0;1,1,0;1,1,0;1,1,0;...
+%     0,1,1;0,1,1];
+%     
+%     
 
 
 
+plot_elec='no';
 whole_brain='yes';
 distance_region=2; % distance of electrodes from region to be included in the plot
 hemisphere='left';
-sel_atlas='aal';
+sel_atlas='freesurferDK';
 %sel_color= [1,0,0;0,1,0;0,0,1];%rgb value for each region
 %sel_color= [0,0,1;0,0,1;0,0,1];%rgb value for each region
-sel_color= [1,0,0;0,1,0;0,0,1;0,0,1;0,0,1]
 
 allsubs = {'c_sub01','c_sub02','c_sub03','c_sub04','c_sub05','c_sub06','c_sub07','c_sub08','c_sub09','c_sub10',...
     'c_sub11','c_sub12','c_sub13','c_sub14','c_sub15','c_sub16','c_sub17','c_sub18','c_sub20',...
@@ -1114,9 +1128,14 @@ hold on
 switch sel_atlas
     case 'aal'
         atlas_def=strcat(path_templates,'aal\ROI_MNI_V4.nii');
-    otherwise
+        atlas=ft_read_atlas(atlas_def);
+
+    case 'freesurferDK'
+       load('D:\Extinction\iEEG\data\template\atlasDK_norm2mni.mat') 
+       atlas=norm_atlasDK;
+       atlas.anatomylabel=atlas.aparclabel;
+       atlas.coordsys='mni';
 end
-atlas=ft_read_atlas(atlas_def);
 
 
 switch whole_brain
@@ -1153,11 +1172,11 @@ for r=1:numel(sel_regions)
     
     cfg=[];
     cfg.method='iso2mesh';
-    cfg.radbound=2;
+    cfg.radbound=1;
     cfg.maxsurf=0;
     cfg.tissue='brain';
-    cfg.numvertices=5000;
-    cfg.smooth=3;
+    cfg.numvertices=1000;
+    %cfg.smooth=8;
     cfg.spmversion='spm12';
     sel_mesh{r}=ft_prepare_mesh(cfg,seg{r});
     
@@ -1178,6 +1197,7 @@ for n=1:numel(allsubs)
     cfg.distance_region= distance_region;
     cfg.ref='bipolar';
     cfg.clean='clean';
+    cfg.ana_labels=sel_atlas;
     elec_selection=mcf_elec_region_selector(cfg,datainfo);
     
     % sum elec in each region
@@ -1187,11 +1207,12 @@ for n=1:numel(allsubs)
     
     clear elec_selection elec_region_mat
 end
-
+switch plot_elec
+    case 'yes'
 % elec to plot
 elec_toplot.unit ='mm';
 elec_toplot.coordsys ='mni';
-load('D:\Extinction\iEEG\scripts\additional_functions\sel_colorseries.mat')
+load('D:\Extinction\iEEG\extinction_ieeg_scripts\additional_functions\sel_colorseries.mat')
 
 for n=1:numel(sub)   
     elec_toplot.label=all_label{n};
@@ -1200,6 +1221,9 @@ for n=1:numel(sub)
     sel_color=sel_col{n};
     
     ft_plot_sens(elec_toplot,'elec','true','elecshape','sphere','facecolor',sel_color,'elecsize',4);
+end
+
+    case 'no'
 end
 view([-90 20]);
 material dull;
