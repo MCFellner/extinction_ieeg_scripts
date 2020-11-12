@@ -13,8 +13,7 @@ cfg_plot.multiplot='yes';
 load('D:\matlab_tools\jet_grey.mat')
 cfg_plot.def_colormap=jet_grey;
 
-%all_rois={'hip_l','hip_r','vmpfc','ifg','dm_pfc','amy_r','amy_l','ventraltempocci'};
-all_rois={'amy'}
+all_rois={'amy','hip','hip_l','hip_r','vmpfc','ifg','dm_pfc','amy_r','amy_l','ventraltempocci'};
 all_contrasts=dir(path_stats);
 all_contrasts={all_contrasts(:).name}';
 all_contrasts=all_contrasts(cellfun(@numel,all_contrasts)>2);

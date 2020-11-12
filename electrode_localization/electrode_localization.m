@@ -1093,21 +1093,21 @@ path_figs='D:\Extinction\iEEG\data\preproc\ieeg\datainfo\figure\';
 % %roi.ventraltempocci_r={'ctx-rh-fusiform','ctx-rh-inferiortemporal','ctx-rh-lateraloccipital','ctx-rh-lingual','ctx-rh-middletemporal','ctx-rh-parahippocampal','ctx-rh-temporalpole'};
 %all_roi.amy={'Left-Amygdala','Right-Amygdala'};
 
-sel_regions={'Left-Amygdala','Left-Hippocampus','ctx-lh-lateralorbitofrontal','ctx-lh-medialorbitofrontal'};
-sel_color= [1,0,0;0,1,0;0,0,1;0,0,1];%rgb value for each region
+% sel_regions={'Left-Amygdala','Left-Hippocampus','ctx-lh-lateralorbitofrontal','ctx-lh-medialorbitofrontal'};
+% sel_color= [1,0,0;0,1,0;0,0,1;0,0,1];%rgb value for each region
 
-% sel_regions={'ctx-lh-fusiform','ctx-lh-inferiortemporal','ctx-lh-lateraloccipital',...
-%     'ctx-lh-lingual','ctx-lh-middletemporal','ctx-lh-parahippocampal','ctx-lh-temporalpole',...
-%     'ctx-lh-rostralmiddlefrontal','ctx-lh-caudalmiddlefrontal'};
-% sel_color= [1,1,0;1,1,0;1,1,0;...
-%     1,1,0;1,1,0;1,1,0;1,1,0;...
-%     0,1,1;0,1,1];
+sel_regions={'ctx-lh-fusiform','ctx-lh-inferiortemporal','ctx-lh-lateraloccipital',...
+    'ctx-lh-lingual','ctx-lh-middletemporal','ctx-lh-parahippocampal','ctx-lh-temporalpole',...
+    'ctx-lh-rostralmiddlefrontal','ctx-lh-caudalmiddlefrontal'};
+sel_color= [1,1,0;1,1,0;1,1,0;...
+    1,1,0;1,1,0;1,1,0;1,1,0;...
+    0,1,1;0,1,1];
 %     
 %     
 
 
 
-plot_elec='yes';
+plot_elec='no';
 whole_brain='yes';
 distance_region=2; % distance of electrodes from region to be included in the plot
 hemisphere='left';
@@ -1175,7 +1175,7 @@ for r=1:numel(sel_regions)
     cfg.radbound=1;
     cfg.maxsurf=0;
     cfg.tissue='brain';
-    cfg.numvertices=1000;
+    cfg.numvertices=100000;
     %cfg.smooth=8;
     cfg.spmversion='spm12';
     sel_mesh{r}=ft_prepare_mesh(cfg,seg{r});
