@@ -1107,7 +1107,7 @@ sel_color= [1,0,0;0,1,0;0,0,1;0,0,1];%rgb value for each region
 
 
 
-plot_elec='no';
+plot_elec='yes';
 whole_brain='yes';
 distance_region=2; % distance of electrodes from region to be included in the plot
 hemisphere='left';
