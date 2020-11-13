@@ -4,6 +4,9 @@ addpath('D:\Extinction\iEEG\extinction_ieeg_scripts\additional_functions')
 
 %% average rsa values for contrasts
 
+% get rsa value frm sig clusters
+
+
 path_info='D:\Extinction\iEEG\data\preproc\ieeg\datainfo\';
 path_preproc='D:\Extinction\iEEG\data\preproc\ieeg\readin\';
 path_out='D:\Extinction\iEEG\analysis\rsa\';

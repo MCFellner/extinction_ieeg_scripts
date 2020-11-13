@@ -213,14 +213,11 @@ for sub=1:length(allsubs)
                 contrast_mat(contrast_mat==0)=NaN;
                 clear def_vec
              case 'video_specific'    
-                sel_col=trlinfo(:,3);
-                all_vid=unique(sel_col);
-                for i=1:numel(all_vid)
-                    tmp=sel_col==all_vid(i);
-                    tmp_mat=tmp*tmp';
-                    contrast_mat=contrast_mat+tmp_mat;
-                end
-                clear sel_col all_vid tmp tmp_mat
+def_vec=trlinfo(:,9)==0;
+                contrast_mat=contrast_mat+(def_vec*def_vec');
+                
+                contrast_mat(contrast_mat==0)=NaN;
+                clear def_vec
 
             case 'trial_slidingavg_def'
                 % here a contrast_mat for every rep is created

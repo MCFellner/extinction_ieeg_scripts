@@ -37,9 +37,9 @@ contrasts={'video_specific_mask_block1','video_specific_mask_block2','video_spec
 
 % segment data in different trial parts
 % item window: -1 to 4 (imp
-pre_item=-2;
+pre_item=-1;
 post_item=5.5;
-toi=[0 3];
+toi=[2 3];
 win_pow=0.05; % in sec, power estimated for every win
 win=0.200; % duration of item
 slide=0.05;
