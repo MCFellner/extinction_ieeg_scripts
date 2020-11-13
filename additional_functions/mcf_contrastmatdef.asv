@@ -31,8 +31,8 @@ else
    tmp_mask=ones(size(contrast_def.item_specific));
    tmp_def=sel_def;
    for m=1:num_mask
-    sel_mask=tmp_def(mask_def(m)+6:end);
     tmp_def=tmp_def(1:mask_def(m)-1);
+    sel_mask=tmp_def(mask_def(m)+6:end);
     tmp_mask=tmp_mask.*getfield(contrast_def,sel_mask);
    end
    sel_contrast=tmp_def;
