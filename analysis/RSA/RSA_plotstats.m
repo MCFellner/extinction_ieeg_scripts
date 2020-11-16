@@ -1,4 +1,8 @@
-% stats plotter
+addpath('D:\matlab_tools\fieldtrip-20200130')
+ft_defaults
+addpath('D:\Extinction\iEEG\extinction_ieeg_scripts\additional_functions')
+
+%% stats plotter
 
 %plot results of rsa stats in organized plots
 
