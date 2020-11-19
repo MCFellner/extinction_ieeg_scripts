@@ -367,6 +367,12 @@ mkdir(path_out)
 allsubs = {'c_sub01','c_sub02','c_sub03','c_sub04','c_sub05','c_sub06','c_sub07','c_sub08','c_sub09','c_sub10',...
           'c_sub11','c_sub12','c_sub13','c_sub14','c_sub15','c_sub16','c_sub17','c_sub18','c_sub20'};
 
+
+%%% 19 22 23 are in nihon kodhen format, also readable by ft:
+% cfg=[];
+% cfg.dataset='D:\Extinction\iEEG\rawdata\China\QichenGroup\19_ZJJ\EEG2100\DA0052CM.eeg';
+% data=ft_preprocessing(cfg)
+      
       
 for sub=5%:length(allsubs)
 sel_sub=allsubs{sub};
