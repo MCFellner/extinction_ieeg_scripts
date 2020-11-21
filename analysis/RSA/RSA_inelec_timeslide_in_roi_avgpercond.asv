@@ -167,10 +167,15 @@ for sub=1:length(sel_subs)
     % select data from defined window/cluster
     % average data for choosen masks
     cfg_sel=cluster_def;
-    mcf_rsadataselect(cfg_sel,rsa)
+    rsa=mcf_rsadataselect(cfg_sel,rsa);
     
     
-    load(fullfile(path_designmat,strcat(sel_sub,'_contrast_mat_sym')))
+     load(fullfile(path_designmat,strcat(sel_sub,'_contrast_mat_sym')))
+    
+     % sort trials to same order as in contrat_mats
+     sortind=contrast_def.sortind_org2usedtrlinfo;
+    rsa.rsa_mat=rsa.rsa_mat(sortind,:);
+    rsa.rsa_mat=rsa.rsa_mat(:,sortind);
     %contrast_mat=getfield(contrast_def,contrast);
     
     

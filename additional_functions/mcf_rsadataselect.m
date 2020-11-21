@@ -26,12 +26,25 @@ switch cfg.type
        elseif any(cfg.stat_tx~=rsa.time)
         error(' time in stat mask and rsa do not match')
        end
-
-        mask=repmat(cfg.stat_mask,size(rsa.rsa_mat,1),size(rsa.rsa_mat,1),1,1);
-        mask(mask)=NaN;
+        mask(1,1,:,:)=cfg.stat_mask;
+        mask=repmat(mask,size(rsa.rsa_mat,1),size(rsa.rsa_mat,1),1,1);
+        mask(mask==0)=NaN;
         % select data
-        rsa_tmp=squeeze(nanmean(nanmean(rsa.rsa.mat.*mask)));
+        rsa_tmp=squeeze(nanmean(nanmean(rsa.rsa_mat.*mask,3),4));
+        rsa.dim='trial_trial';
+        rsa.rsa_mat=rsa_tmp;
+        cfg.previous=rsa.cfg;
+        cfg.previous.time=rsa.time;
+        cfg.previous.t1=rsa.t1;
+        cfg.previous.t2=rsa.t2;
+
+        rsa.cfg=cfg;
+        rsa=rmfield(rsa,'t1');
+        rsa=rmfield(rsa,'t2');
+        rsa=rmfield(rsa,'time');
+
     case 'window'
+        error('not implemented yet')
 end
 
             

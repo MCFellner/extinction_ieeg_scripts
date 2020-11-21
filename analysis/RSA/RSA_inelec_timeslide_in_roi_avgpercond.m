@@ -167,7 +167,7 @@ for sub=1:length(sel_subs)
     % select data from defined window/cluster
     % average data for choosen masks
     cfg_sel=cluster_def;
-    mcf_rsadataselect(cfg_sel,rsa)
+    rsa=mcf_rsadataselect(cfg_sel,rsa);
     
     
     load(fullfile(path_designmat,strcat(sel_sub,'_contrast_mat_sym')))
