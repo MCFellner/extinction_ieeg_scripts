@@ -258,7 +258,7 @@ cmap_default=cmap_default([1 2 4],:)
 
 addpath(genpath('D:\matlab_tools\boundedline\kakearney-boundedline-pkg-8179f9a'))
 fig=figure
-subplot(3,2,1)
+subplot(4,2,1)
 bar(reshape(squeeze(nanmean(all_contrast_rsa.item_specific_x_block))',1,[]))
 hold on
 scatter(reshape(repmat([1 2 3 4 5 6],numel(sel_subs),1),1,[]),...
@@ -268,27 +268,13 @@ xticklabels({'wi block1','bi block1','wi block2','bi block2','wi block3','bi blo
 title('itemspecific x block')
 xtickangle(45)
 
-Biases = rand(18,3*5*2); % subjects, HRs*obstacle pos.*VFs
-varNames = cell(3*5*2,1);
-for i = 1 : 3*5*2   
-    v = strcat('V',num2str(i));    
-    varNames{i,1} = v;
-end
-% Create a table storing the respones
-tbiases = array2table(Biases, 'VariableNames',varNames);
-rsa_val = array2table(Biases, 'VariableNames','sel_sub');
-% Create the within table
-factorNames = {'HRs','VisualFeedback', 'ObstaclePos'};
-within = table(HRs, VFs, OPs, 'VariableNames', factorNames);
-% fit the repeated measures model
-rm = fitrm(tbiases,'V1-V30~1','WithinDesign',within);
-[ranovatblb] = ranova(rm, 'WithinModel','HRs*VisualFeedback*ObstaclePos');
 
-subplot(3,2,3:4)
+subplot(4,2,3:4)
 bar(reshape(squeeze(nanmean(all_contrast_rsa.item_specific_x_halfs))',1,[]))
 hold on
-scatter([1:16],...
-reshape(squeeze(nanmean(all_contrast_rsa.item_specific_x_halfs))',1,[]))
+scatter(reshape(repmat(1:16,numel(sel_subs),1),1,[]),...
+reshape(permute(all_contrast_rsa.item_specific_x_halfs,[1,3,2]),1,[]))
+
 xticks(1:16)
 xticklabels({'wi 1half','bi 1half','wi 2half','bi 2half',...
   'wi 1block1','bi 1block1','wi 2block1','bi 2block1',...
@@ -298,13 +284,215 @@ xticklabels({'wi 1half','bi 1half','wi 2half','bi 2half',...
 title('itemspecific x halfs')
 xtickangle(45)
 
-subplot(3,3,3:4)
+subplot(4,2,7:8)
 for ty=1:2
-x1=1:size(all_contrast_rsa.item_specific_x_trialcourse,1)
+x1=1:size(all_contrast_rsa.item_specific_x_trialcourse,2)
     y1=squeeze(nanmean(all_contrast_rsa.item_specific_x_trialcourse(:,:,ty)));
     b1=squeeze(nanstd(all_contrast_rsa.item_specific_x_trialcourse(:,:,ty)))./sqrt(numel(sel_subs));
    
 boundedline(x1, y1, b1, 'cmap',cmap_default(ty,:),'transparency',0.1,'alpha');
 end
+legend([{'wi'},{'stde'},{'bi'},{'stde'}],'Location','northeastoutside')
+title('trial course')
 
 
+%%%%%%%%%%stats
+rsa_mat= reshape(all_contrast_rsa.item_specific_x_block,numel(sel_subs),[]);
+for i = 1 :   size(rsa_mat,2)
+    v = strcat('V',num2str(i));    
+    varNames{i,1} = v;
+end
+% Create a table storing the respones
+rsa_val = array2table(rsa_mat, 'VariableNames',varNames);
+% Create the within table
+block=reshape(repmat([{'block1'};{'block2'};{'block3'}],1,2),[],1);
+type=reshape(repmat([{'within'},{'between'}],3,1),[],1);
+
+factorNames = {'type','block'};
+within = table(block, type, 'VariableNames', factorNames);
+% fit the repeated measures model
+rm = fitrm(rsa_val,'V1-V6~1','WithinDesign',within);
+[ranovatblb] = ranova(rm, 'WithinModel','type*block');
+subplot(4,2,2)
+ylim([0 1])
+axis off
+hold on
+text(0,1,['anova: type x block'])
+text(0,0.8,['type:','F(',num2str(ranovatblb.DF('(Intercept):type')),',',...
+    num2str(ranovatblb.DF('Error(type)')),')=',...
+    'p=',num2str(ranovatblb.pValue('(Intercept):type'))])
+text(0,0.6,['block:','F(',num2str(ranovatblb.DF('(Intercept):block')),',',...
+    num2str(ranovatblb.DF('Error(block)')),')=',...
+    'p=',num2str(ranovatblb.pValue('(Intercept):block'))])
+text(0,0.4,['typexblock:','F(',num2str(ranovatblb.DF('(Intercept):type:block')),',',...
+    num2str(ranovatblb.DF('Error(type:block)')),')=',...
+    'p=',num2str(ranovatblb.pValue('(Intercept):type:block'))])
+
+
+
+
+% Create a table storing the respones
+rsa_mat= reshape(all_contrast_rsa.item_specific_x_halfs(:,3:8,:),numel(sel_subs),[]);
+for i = 1 :   size(rsa_mat,2)
+    v = strcat('V',num2str(i));    
+    varNames{i,1} = v;
+end
+rsa_val = array2table(rsa_mat, 'VariableNames',varNames);
+
+% Create the within table
+block=reshape(repmat([{'block1'};{'block2'};{'block3'}]',4,1,1),[],1);
+type=reshape(repmat([{'within'},{'between'}],6,1,1),[],1);
+half=reshape(repmat([{'first'},{'second'}],2,3,1),[],1);
+
+factorNames = {'type','block','half'};
+within = table(block, type, half, 'VariableNames', factorNames);
+% fit the repeated measures model
+rm = fitrm(rsa_val,'V1-V12~1','WithinDesign',within);
+[ranovatblb] = ranova(rm, 'WithinModel','type*block*half');
+subplot(4,2,5:6)
+ylim([0 1.6])
+axis off
+hold on
+text(0,1.4,['anova: type x block x half'])
+text(0,1.2,['type:','F(',num2str(ranovatblb.DF('(Intercept):type')),',',...
+    num2str(ranovatblb.DF('Error(type)')),')=',...
+    'p=',num2str(ranovatblb.pValue('(Intercept):type'))])
+text(0,1,['half:','F(',num2str(ranovatblb.DF('(Intercept):half')),',',...
+    num2str(ranovatblb.DF('Error(half)')),')=',...
+    'p=',num2str(ranovatblb.pValue('(Intercept):block'))])
+text(0,0.8,['block:','F(',num2str(ranovatblb.DF('(Intercept):block')),',',...
+    num2str(ranovatblb.DF('Error(block)')),')=',...
+    'p=',num2str(ranovatblb.pValue('(Intercept):block'))])
+text(0,0.6,['typexblock:','F(',num2str(ranovatblb.DF('(Intercept):type:block')),',',...
+    num2str(ranovatblb.DF('Error(type:block)')),')=',...
+    'p=',num2str(ranovatblb.pValue('(Intercept):type:block'))])
+text(0,0.4,['halfxblock:','F(',num2str(ranovatblb.DF('(Intercept):block:half')),',',...
+    num2str(ranovatblb.DF('Error(block:half)')),')=',...
+    'p=',num2str(ranovatblb.pValue('(Intercept):block:half'))])
+text(0,0.2,['typexhalf:','F(',num2str(ranovatblb.DF('(Intercept):type:half')),',',...
+    num2str(ranovatblb.DF('Error(type:half)')),')=',...
+    'p=',num2str(ranovatblb.pValue('(Intercept):type:half'))])
+text(0,0.0,['halfxtypexblock:','F(',num2str(ranovatblb.DF('(Intercept):type:block:half')),',',...
+    num2str(ranovatblb.DF('Error(type:block:half)')),')=',...
+    'p=',num2str(ranovatblb.pValue('(Intercept):type:block.half'))])
+
+
+%%%%%%valence 
+fig=figure
+subplot(4,2,1)
+bar(reshape(squeeze(nanmean(all_contrast_rsa.item_specific_x_block))',1,[]))
+hold on
+scatter(reshape(repmat([1 2 3 4 5 6],numel(sel_subs),1),1,[]),...
+reshape(permute(all_contrast_rsa.type1to2_vs_type2to3_x_block,[1,3,2]),1,[]))
+xticks(1:6)
+xticklabels({'type1to2 block1','bi block1','type1to2 block2','bi block2','type1to2 block3','bi block3'})
+title('itemspecific x block')
+xtickangle(45)
+
+
+subplot(4,2,3:4)
+bar(reshape(squeeze(nanmean(all_contrast_rsa.type1to2_vs_type2to3_x_halfs))',1,[]))
+hold on
+scatter(reshape(repmat(1:16,numel(sel_subs),1),1,[]),...
+reshape(permute(all_contrast_rsa.type1to2_vs_type2to3_x_halfs,[1,3,2]),1,[]))
+
+xticks(1:16)
+xticklabels({'type1to2 1half','bi 1half','type1to2 2half','bi 2half',...
+  'type1to2 1block1','bi 1block1','type1to2 2block1','bi 2block1',...
+  'type1to2 1block2','bi 1block2','type1to2 2block2','bi 2block2',...
+  'type1to2 1block3','bi 1block3','type1to2 2block3','bi 2block3',...
+  })
+title('valencespecific x halfs')
+xtickangle(45)
+
+subplot(4,2,7:8)
+for ty=1:2
+x1=1:size(all_contrast_rsa.type1to2_vs_type2to3_x_trialcourse,2)
+    y1=squeeze(nanmean(all_contrast_rsa.type1to2_vs_type2to3_x_trialcourse(:,:,ty)));
+    b1=squeeze(nanstd(all_contrast_rsa.type1to2_vs_type2to3_x_trialcourse(:,:,ty)))./sqrt(numel(sel_subs));
+   
+boundedline(x1, y1, b1, 'cmap',cmap_default(ty,:),'transparency',0.1,'alpha');
+end
+legend([{'type1to2'},{'stde'},{'type2to3'},{'stde'}],'Location','northeastoutside')
+title('valence: trial course')
+
+
+%%%%%%%%%%stats
+rsa_mat= reshape(all_contrast_rsa.type1to2_vs_type2to3_x_block,numel(sel_subs),[]);
+for i = 1 :   size(rsa_mat,2)
+    v = strcat('V',num2str(i));    
+    varNames{i,1} = v;
+end
+% Create a table storing the respones
+rsa_val = array2table(rsa_mat, 'VariableNames',varNames);
+% Create the within table
+block=reshape(repmat([{'block1'};{'block2'};{'block3'}],1,2),[],1);
+type=reshape(repmat([{'type1to2'},{'between'}],3,1),[],1);
+
+factorNames = {'type','block'};
+within = table(block, type, 'VariableNames', factorNames);
+% fit the repeated measures model
+rm = fitrm(rsa_val,'V1-V6~1','WithinDesign',within);
+[ranovatblb] = ranova(rm, 'WithinModel','type*block');
+subplot(4,2,2)
+ylim([0 1])
+axis off
+hold on
+text(0,1,['anova: type x block'])
+text(0,0.8,['type:','F(',num2str(ranovatblb.DF('(Intercept):type')),',',...
+    num2str(ranovatblb.DF('Error(type)')),')=',...
+    'p=',num2str(ranovatblb.pValue('(Intercept):type'))])
+text(0,0.6,['block:','F(',num2str(ranovatblb.DF('(Intercept):block')),',',...
+    num2str(ranovatblb.DF('Error(block)')),')=',...
+    'p=',num2str(ranovatblb.pValue('(Intercept):block'))])
+text(0,0.4,['typexblock:','F(',num2str(ranovatblb.DF('(Intercept):type:block')),',',...
+    num2str(ranovatblb.DF('Error(type:block)')),')=',...
+    'p=',num2str(ranovatblb.pValue('(Intercept):type:block'))])
+
+
+
+
+% Create a table storing the respones
+rsa_mat= reshape(all_contrast_rsa.type1to2_vs_type2to3_x_halfs(:,3:8,:),numel(sel_subs),[]);
+for i = 1 :   size(rsa_mat,2)
+    v = strcat('V',num2str(i));    
+    varNames{i,1} = v;
+end
+rsa_val = array2table(rsa_mat, 'VariableNames',varNames);
+
+% Create the within table
+block=reshape(repmat([{'block1'};{'block2'};{'block3'}]',4,1,1),[],1);
+type=reshape(repmat([{'type1to2'},{'type2to3'}],6,1,1),[],1);
+half=reshape(repmat([{'first'},{'second'}],2,3,1),[],1);
+
+factorNames = {'type','block','half'};
+within = table(block, type, half, 'VariableNames', factorNames);
+% fit the repeated measures model
+rm = fitrm(rsa_val,'V1-V12~1','WithinDesign',within);
+[ranovatblb] = ranova(rm, 'WithinModel','type*block*half');
+subplot(4,2,5:6)
+ylim([0 1.6])
+axis off
+hold on
+text(0,1.4,['anova: type x block x half'])
+text(0,1.2,['type:','F(',num2str(ranovatblb.DF('(Intercept):type')),',',...
+    num2str(ranovatblb.DF('Error(type)')),')=',...
+    'p=',num2str(ranovatblb.pValue('(Intercept):type'))])
+text(0,1,['half:','F(',num2str(ranovatblb.DF('(Intercept):half')),',',...
+    num2str(ranovatblb.DF('Error(half)')),')=',...
+    'p=',num2str(ranovatblb.pValue('(Intercept):block'))])
+text(0,0.8,['block:','F(',num2str(ranovatblb.DF('(Intercept):block')),',',...
+    num2str(ranovatblb.DF('Error(block)')),')=',...
+    'p=',num2str(ranovatblb.pValue('(Intercept):block'))])
+text(0,0.6,['typexblock:','F(',num2str(ranovatblb.DF('(Intercept):type:block')),',',...
+    num2str(ranovatblb.DF('Error(type:block)')),')=',...
+    'p=',num2str(ranovatblb.pValue('(Intercept):type:block'))])
+text(0,0.4,['halfxblock:','F(',num2str(ranovatblb.DF('(Intercept):block:half')),',',...
+    num2str(ranovatblb.DF('Error(block:half)')),')=',...
+    'p=',num2str(ranovatblb.pValue('(Intercept):block:half'))])
+text(0,0.2,['typexhalf:','F(',num2str(ranovatblb.DF('(Intercept):type:half')),',',...
+    num2str(ranovatblb.DF('Error(type:half)')),')=',...
+    'p=',num2str(ranovatblb.pValue('(Intercept):type:half'))])
+text(0,0.0,['halfxtypexblock:','F(',num2str(ranovatblb.DF('(Intercept):type:block:half')),',',...
+    num2str(ranovatblb.DF('Error(type:block:half)')),')=',...
+    'p=',num2str(ranovatblb.pValue('(Intercept):type:block.half'))])
