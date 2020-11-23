@@ -70,16 +70,17 @@ cluster_def.stat_ty=stats.freq; % define time to ensure correct selection
 %%%%%%%% contrasts to plots (single plot for each group)
 % every contrast gets trial course, barplots for blocks (subblocks)
 
-% item specfic contrast 
+% item specfic contrast
 % valence contrast
 
 contrasts={'item_specific','type1to2_vs_type2to3'};
-contrast_masks={    'block1','block2','block3',...
-    'first_half_eachblock','second_half_eachblock',...
-        'first_half_block1','second_half_block1',...
-        'first_half_block2','second_half_block2',...
-        'first_half_block3','second_half_block3',...
-        'trial_slidingavg_def'};
+mask_def={'block','halfs','trialcourse'};
+contrast_masks={    {'block1','block2','block3'},...
+    {'first_half_eachblock','second_half_eachblock',...
+    'first_half_block1','second_half_block1',...
+    'first_half_block2','second_half_block2',...
+    'first_half_block3','second_half_block3'},...
+    {'trial_slidingavg_def'}};
 %%%%%%%%%%%%%%%
 
 % all rois definitions
@@ -125,9 +126,20 @@ end
 
 % subs with electrodes in this roi
 sel_subs=allsubs(cellfun(@isempty, all_roi_labels(:))==0);
-%preallocate for speed
 
 n_bins=numel(toi(1):slide:(toi(2)-win));
+
+% initialize result matrix
+
+all_contrast_rsa=[];
+for con_m=1:numel(contrasts)
+        sel_con=contrasts{con_m};
+        for m=1:numel(mask_def)
+            sel_def=mask_def{m};
+            sel_masks=contrast_masks{m};
+            all_contrast_rsa=setfield(all_contrast_rsa,[sel_con,'_x_',sel_def],[]);
+        end
+end
 
 for sub=1:length(sel_subs)
     sel_sub=sel_subs{sub};
@@ -151,7 +163,6 @@ for sub=1:length(sel_subs)
     cfg_preproc.channel     = all_roi_labels{sub_ind};
     cfg_preproc.trialinfo=datainfo.trialinfo;
     data=mcf_preproc(cfg_preproc, data);
-    clear cfg_preproc trl
     
     % defintion for features
     cfg_rsa.freqdef=pow_feature;
@@ -169,47 +180,114 @@ for sub=1:length(sel_subs)
     cfg_sel=cluster_def;
     rsa=mcf_rsadataselect(cfg_sel,rsa);
     
-    
     load(fullfile(path_designmat,strcat(sel_sub,'_contrast_mat_sym')))
+    
+    % sort trials to same order as in contrat_mats
+    sortind=contrast_def.sortind_org2usedtrlinfo;
+    rsa.rsa_mat=rsa.rsa_mat(sortind,:);
+    rsa.rsa_mat=rsa.rsa_mat(:,sortind);
     %contrast_mat=getfield(contrast_def,contrast);
     
+    % vectorize rsa_mat
+    rsa_vec=reshape(rsa.rsa_mat,numel(rsa.rsa_mat),1);
     
-    for cons=1:numel(contrasts)
-        contrast=contrasts{cons};
-        contrast_mat=mcf_contrastmatdef(contrast_def,contrast);
+    all_contrast_mat=[];
+    % selcontrast is contrast x mask
+    for con_m=1:numel(contrasts)
+        sel_con=contrasts{con_m};
         
-        % get condition and rand contrasts
-        cfg_con.generate_rand='no';
-        cfg_con.contrast_mat=contrast_mat;
-        cfg_con.sortind=contrast_def.sortind_org2usedtrlinfo;
-        [rsa_cond]=mcf_rsacontrasts(cfg_con,rsa);
-        
-        %  rsa_ga.cond_rsa(sub,:,:,:)=rsa_cond.cond_rsa;
-        
-        %      save(fullfile(folder_out,strcat(sel_sub,'_rsastat')),'all_stat')
-        %  clear all_stat
+        for m=1:numel(mask_def)
+            sel_def=mask_def{m};
+            sel_masks=contrast_masks{m};
+            for s=1:numel(sel_masks)
+                sel_mask=sel_masks{s};
+                
+                sel_contrast =[sel_con,'_mask_',sel_mask];
+                tmp=mcf_contrastmatdef(contrast_def,sel_contrast);
+                contrast_mat_tmp{s}=reshape(tmp,[],size(rsa_vec,1));
+                clear tmp
+            end
+            contrast_mat_tmp=vertcat(contrast_mat_tmp{:});
+            all_contrast_mat=setfield(all_contrast_mat,[sel_con,'_x_',sel_def],contrast_mat_tmp);
+            clear contrast_mat_tmp sel_contrast
+        end
     end
-    
-    
-    % plot result
-    fig=figure
-    imagesc(stats.time,stats.time,squeeze(stats.stat),[-5 5])
-    hold on
-    colormap(jet_grey)
-    colorbar
-    title({[contrast];[roi];['pos tsum:',num2str(stats.trial_rand.data_pos(1)),'p=',num2str(stats.trial_rand.p_pos(1))];['neg tsum:',num2str(stats.trial_rand.data_neg(1)),'p=',num2str(stats.trial_rand.p_neg(1))]})
-    ylabel('t in s')
-    xlabel('t in s')
-    contour(stats.time,stats.time,squeeze(stats.trial_rand.mask),1,'k')
-    set(gca,'YDir','normal')
-    %         path_fig=fullfile( folder_out,'fig');
-    %         mkdir(path_fig)
-    %         savefig(fig,[path_fig,'\',contrast,'_in_',roi],'compact')
+   clear con con_m tmp sel_con sel_def sel_contrast sel_mask m 
+    %     %%%%%%%%% get average values for each contrast_vec x mask_vec
     %
-    %         save([path_fig,'\',contrast,'_in_',roi,'.mat'],'stats')
-    close all
+    all_con=fieldnames(all_contrast_mat);
+    for con=1:numel(all_con)
+        sel_con=all_con{con};
+       sel_mat= getfield(all_contrast_mat,sel_con);
+       tmp=getfield(all_contrast_rsa,sel_con);
+        for c=1:size(sel_mat,1)
+          tmp(sub,c,1)= mean( rsa_vec(sel_mat(c,:)==1));
+          tmp(sub,c,2)= mean( rsa_vec(sel_mat(c,:)==2));
+        end
+    all_contrast_rsa=setfield(all_contrast_rsa,sel_con,tmp);
+    clear tmp
+    end
+    % plot result
+    
+    
+%     
+%     fig=figure
+%     imagesc(stats.time,stats.time,squeeze(stats.stat),[-5 5])
+%     hold on
+%     colormap(jet_grey)
+%     colorbar
+%     title({[contrast];[roi];['pos tsum:',num2str(stats.trial_rand.data_pos(1)),'p=',num2str(stats.trial_rand.p_pos(1))];['neg tsum:',num2str(stats.trial_rand.data_neg(1)),'p=',num2str(stats.trial_rand.p_neg(1))]})
+%     ylabel('t in s')
+%     xlabel('t in s')
+%     contour(stats.time,stats.time,squeeze(stats.trial_rand.mask),1,'k')
+%     set(gca,'YDir','normal')
+%     %         path_fig=fullfile( folder_out,'fig');
+%     %         mkdir(path_fig)
+%     %         savefig(fig,[path_fig,'\',contrast,'_in_',roi],'compact')
+%     %
+%     %         save([path_fig,'\',contrast,'_in_',roi,'.mat'],'stats')
+%     close all
 end
 
+all_con=fieldnames(all_contrast_rsa);
+% item specific figure
 
+fig_stuff=subplot(1,1,1)
+cmap_default=fig_stuff.ColorOrder;
+cmap_default=cmap_default([1 2 4],:)
+
+addpath(genpath('D:\matlab_tools\boundedline\kakearney-boundedline-pkg-8179f9a'))
+fig=figure
+subplot(3,2,1)
+bar(reshape(squeeze(nanmean(all_contrast_rsa.item_specific_x_block))',1,[]))
+hold on
+scatter(reshape(repmat([1 2 3 4 5 6],numel(sel_subs),1),1,[]),...
+reshape(permute(all_contrast_rsa.item_specific_x_block,[1,3,2]),1,[]))
+xticks(1:6)
+xticklabels({'wi block1','bi block1','wi block2','bi block2','wi block3','bi block3'})
+title('itemspecific x block')
+xtickangle(45)
+subplot(3,2,3:4)
+bar(reshape(squeeze(nanmean(all_contrast_rsa.item_specific_x_halfs))',1,[]))
+hold on
+scatter([1:16],...
+reshape(squeeze(nanmean(all_contrast_rsa.item_specific_x_halfs))',1,[]))
+xticks(1:16)
+xticklabels({'wi 1half','bi 1half','wi 2half','bi 2half',...
+  'wi 1block1','bi 1block1','wi 2block1','bi 2block1',...
+  'wi 1block2','bi 1block2','wi 2block2','bi 2block2',...
+  'wi 1block3','bi 1block3','wi 2block3','bi 2block3',...
+  })
+title('itemspecific x halfs')
+xtickangle(45)
+
+subplot(3,3,3:4)
+for ty=1:2
+x1=1:size(all_contrast_rsa.item_specific_x_trialcourse,1)
+    y1=squeeze(nanmean(all_contrast_rsa.item_specific_x_trialcourse(:,:,ty)));
+    b1=squeeze(nanstd(all_contrast_rsa.item_specific_x_trialcourse(:,:,ty)))./sqrt(numel(sel_subs));
+   
+boundedline(x1, y1, b1, 'cmap',cmap_default(ty,:),'transparency',0.1,'alpha');
+end
 
 
