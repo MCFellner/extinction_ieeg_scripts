@@ -51,10 +51,14 @@ norm='z_crosstrials';
 sr=1000;
 
 %%%%%%%%%%%% % define cluster/ time window to select data from
-%contrast= 'item_specific_mask_block1';
-contrast= 'type1to2_vs_type2to3_mask_block1';
-roi='amy';
-%roi='ventraltempocci';
+% contrast= 'type1to2_vs_type2to3_mask_block1_interaction_type1to2_vs_type2to3_mask_block2';
+% roi='amy';
+contrast= 'item_specific';
+roi='ventraltempocci';
+
+
+% interaction hip? dmpfc?
+
 
 folder_stats=fullfile(path_out,[pow_feature,'_timeslide_',norm,'_toi',num2str(toi(1)*1000),'to',num2str(toi(2)*1000)],'stats',contrast);
 
@@ -260,22 +264,21 @@ addpath(genpath('D:\matlab_tools\boundedline\kakearney-boundedline-pkg-8179f9a')
 folder_fig=fullfile(folder_stats,roi,'cluster_extracted_values');
 mkdir(folder_fig)
 %% figure itemspecific
-fig=figure
-co = repmat([1 0 0; 0 0 1],8,1);
-set(groot,'defaultAxesColorOrder',co)
-cmap_default=co;
-subplot(2,3,1)
 
-cat={'wi block1','bi block1','wi block2','bi block2','wi block3','bi block3'};
-violinplot( reshape(permute(all_contrast_rsa.item_specific_x_block,[1,3,2]),numel(sel_subs),[]),cat)
-% bar(reshape(squeeze(nanmean(all_contrast_rsa.item_specific_x_block))',1,[]))
-% hold on
-% scatter(reshape(repmat([1 2 3 4 5 6],numel(sel_subs),1),1,[]),...
-% reshape(permute(all_contrast_rsa.item_specific_x_block,[1,3,2]),1,[]))
-% xticks(1:6)
-% xticklabels({'wi block1','bi block1','wi block2','bi block2','wi block3','bi block3'})
-title('itemspecific x block')
-xtickangle(45)
+
+fig=figure
+
+rsa_mat=reshape(permute(all_contrast_rsa.item_specific_x_block,[1,3,2]),numel(sel_subs),[]);
+factors={'type','block'};
+block=reshape(repmat([{'block1'};{'block2'};{'block3'}]',2,1),[],1);
+type=reshape(repmat([{'wi'},{'bi'}],3,1)',[],1);
+cat_mat=[type,block];
+colorscheme=[1 0 0; 0 0 1];
+
+table=mcf_rsaclusterplot(rsa_mat,factors,cat_mat,colorscheme);
+sgtitle('itemspecific x block')
+
+
 
 
 subplot(2,3,2:3)
@@ -310,43 +313,11 @@ title('trial course')
 
 
 %%%%%%%%%%stats
-rsa_mat= reshape(all_contrast_rsa.item_specific_x_block,numel(sel_subs),[]);
-for i = 1 :   size(rsa_mat,2)
-    v = strcat('V',num2str(i));    
-    varNames{i,1} = v;
-end
-% Create a table storing the respones
-rsa_val = array2table(rsa_mat, 'VariableNames',varNames);
-% Create the within table
-block=reshape(repmat([{'block1'};{'block2'};{'block3'}],1,2),[],1);
-type=reshape(repmat([{'within'},{'between'}],3,1),[],1);
-
-factorNames = {'type','block'};
-within = table(type, block, 'VariableNames', factorNames);
-% fit the repeated measures model
-rm = fitrm(rsa_val,'V1-V6~1','WithinDesign',within);
-[ranovatblb] = ranova(rm, 'WithinModel','type*block');
-subplot(4,3,7)
-ylim([0 1])
-axis off
-hold on
-text(0,1,['anova: type x block'])
-text(0,0.8,['type:','F(',num2str(ranovatblb.DF('(Intercept):type')),',',...
-    num2str(ranovatblb.DF('Error(type)')),')=',num2str(ranovatblb.F('(Intercept):type')),...
-    'p=',num2str(ranovatblb.pValue('(Intercept):type'))],'FontSize',8)
-text(0,0.6,['block:','F(',num2str(ranovatblb.DF('(Intercept):block')),',',...
-    num2str(ranovatblb.DF('Error(block)')),')=',num2str(ranovatblb.F('(Intercept):block')),...
-    'p=',num2str(ranovatblb.pValue('(Intercept):block'))],'FontSize',8)
-text(0,0.4,['typexblock:','F(',num2str(ranovatblb.DF('(Intercept):type:block')),',',...
-    num2str(ranovatblb.DF('Error(type:block)')),')=',num2str(ranovatblb.F('(Intercept):type:block')),...
-    'p=',num2str(ranovatblb.pValue('(Intercept):type:block'))],'FontSize',8)
-
-clear varNames factorNames
 
 
 
 % Create a table storing the respones
-rsa_mat= reshape(all_contrast_rsa.item_specific_x_halfs,numel(sel_subs),[]);
+rsa_mat=  reshape(permute(all_contrast_rsa.item_specific_x_halfs,[1,3,2]),numel(sel_subs),[]);
 for i = 1 :   size(rsa_mat,2)
     v = strcat('V',num2str(i));    
     varNames{i,1} = v;
@@ -355,7 +326,7 @@ rsa_val = array2table(rsa_mat, 'VariableNames',varNames);
 
 % Create the within table
 block=reshape(repmat([{'block1'};{'block2'};{'block3'}]',4,1,1),[],1);
-type=reshape(repmat([{'within'},{'between'}],6,1,1),[],1);
+type=reshape(repmat([{'within'},{'between'}]',6,1,1),[],1);
 half=reshape(repmat([{'first'},{'second'}],2,3,1),[],1);
 
 factorNames = {'type','block','half'};
@@ -394,7 +365,7 @@ clear varNames factorNames
 
 
 savefig(fig,fullfile(folder_fig,'itemspecific_effects.fig'))
-close all
+%close all
 %% figure item specific wi-bi difference 
 fig=figure
 co = repmat([0.5 0 0.5],8,1);
@@ -546,7 +517,7 @@ legend([{'type1to2'},{'stde'},{'type2to3'},{'stde'}],'Location','northeastoutsid
 title('valence: trial course')
 
 %%%%%%%%%%stats
-rsa_mat= reshape(all_contrast_rsa.type1to2_vs_type2to3_x_block,numel(sel_subs),[]);
+rsa_mat=reshape(permute(all_contrast_rsa.type1to2_vs_type2to3_x_block,[1,3,2]),numel(sel_subs),[]);
 for i = 1 :   size(rsa_mat,2)
     v = strcat('V',num2str(i));    
     varNames{i,1} = v;
@@ -555,8 +526,8 @@ end
 rsa_val = array2table(rsa_mat, 'VariableNames',varNames);
 clear varNames
 % Create the within table
-block=reshape(repmat([{'block1'};{'block2'};{'block3'}],1,2),[],1);
-type=reshape(repmat([{'type1to2'},{'type2to3'}],3,1),[],1);
+block=reshape(repmat([{'block1'};{'block2'};{'block3'}]',2,1),[],1);
+type=reshape(repmat([{'within'},{'between'}],3,1)',[],1);
 
 factorNames = {'type','block'};
 within = table(type, block, 'VariableNames', factorNames);
@@ -584,7 +555,7 @@ clear varNames factorNames
 
 
 % Create a table storing the respones
-rsa_mat= reshape(all_contrast_rsa.type1to2_vs_type2to3_x_halfs,numel(sel_subs),[]);
+rsa_mat= reshape(permute(all_contrast_rsa.type1to2_vs_type2to3_x_halfs,[1,3,2]),numel(sel_subs),[]);
 for i = 1 :   size(rsa_mat,2)
     v = strcat('V',num2str(i));    
     varNames{i,1} = v;
@@ -593,8 +564,9 @@ rsa_val = array2table(rsa_mat, 'VariableNames',varNames);
 
 % Create the within table
 block=reshape(repmat([{'block1'};{'block2'};{'block3'}]',4,1,1),[],1);
-type=reshape(repmat([{'type1to2'},{'type2to3'}],6,1,1),[],1);
+type=reshape(repmat([{'within'},{'between'}]',6,1,1),[],1);
 half=reshape(repmat([{'first'},{'second'}],2,3,1),[],1);
+
 
 factorNames = {'block','type','half'};
 within = table(block, type, half, 'VariableNames', factorNames);
@@ -615,22 +587,22 @@ text(0,1,['half:','F(',num2str(ranovatblb.DF('(Intercept):half')),',',...
 text(0,0.8,['block:','F(',num2str(ranovatblb.DF('(Intercept):block')),',',...
     num2str(ranovatblb.DF('Error(block)')),')=',num2str(ranovatblb.F('(Intercept):block')),...
     'p=',num2str(ranovatblb.pValue('(Intercept):block'))],'FontSize',8)
-text(0,0.6,['typexblock:','F(',num2str(ranovatblb.DF('(Intercept):type:block')),',',...
-    num2str(ranovatblb.DF('Error(type:block)')),')=',num2str(ranovatblb.F('(Intercept):type:block')),...
-    'p=',num2str(ranovatblb.pValue('(Intercept):type:block'))],'FontSize',8)
+text(0,0.6,['typexblock:','F(',num2str(ranovatblb.DF('(Intercept):block:type')),',',...
+    num2str(ranovatblb.DF('Error(block:type)')),')=',num2str(ranovatblb.F('(Intercept):block:type')),...
+    'p=',num2str(ranovatblb.pValue('(Intercept):block:type'))],'FontSize',8)
 text(0,0.4,['halfxblock:','F(',num2str(ranovatblb.DF('(Intercept):block:half')),',',...
     num2str(ranovatblb.DF('Error(block:half)')),')=',num2str(ranovatblb.F('(Intercept):block:half')),...
     'p=',num2str(ranovatblb.pValue('(Intercept):block:half'))],'FontSize',8)
 text(0,0.2,['typexhalf:','F(',num2str(ranovatblb.DF('(Intercept):type:half')),',',...
     num2str(ranovatblb.DF('Error(type:half)')),')=',num2str(ranovatblb.F('(Intercept):type:half')),...
     'p=',num2str(ranovatblb.pValue('(Intercept):type:half'))],'FontSize',8)
-text(0,0.0,['halfxtypexblock:','F(',num2str(ranovatblb.DF('(Intercept):type:block:half')),',',...
-    num2str(ranovatblb.DF('Error(type:block:half)')),')=',num2str(ranovatblb.F('(Intercept):type:block:half')),...
-    'p=',num2str(ranovatblb.pValue('(Intercept):type:block:half'))],'FontSize',8)
+text(0,0.0,['halfxtypexblock:','F(',num2str(ranovatblb.DF('(Intercept):block:type:half')),',',...
+    num2str(ranovatblb.DF('Error(block:type:half)')),')=',num2str(ranovatblb.F('(Intercept):block:type:half')),...
+    'p=',num2str(ranovatblb.pValue('(Intercept):block:type:half'))],'FontSize',8)
 clear varNames factorNames
 
 savefig(fig,fullfile(folder_fig,'valencepecific_effects.fig'))
-close all
+%close all
 %% figure valence for halfs
 fig=figure
 co = repmat([1 0 0.5],8,1);
