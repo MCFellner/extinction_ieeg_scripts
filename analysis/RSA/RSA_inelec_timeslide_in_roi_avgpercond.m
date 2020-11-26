@@ -129,12 +129,12 @@ n_bins=numel(toi(1):slide:(toi(2)-win));
 
 all_contrast_rsa=[];
 for con_m=1:numel(contrasts)
-        sel_con=contrasts{con_m};
-        for m=1:numel(mask_def)
-            sel_def=mask_def{m};
-            sel_masks=contrast_masks{m};
-            all_contrast_rsa=setfield(all_contrast_rsa,[sel_con,'_x_',sel_def],[]);
-        end
+    sel_con=contrasts{con_m};
+    for m=1:numel(mask_def)
+        sel_def=mask_def{m};
+        sel_masks=contrast_masks{m};
+        all_contrast_rsa=setfield(all_contrast_rsa,[sel_con,'_x_',sel_def],[]);
+    end
 end
 
 for sub=1:length(sel_subs)
@@ -209,41 +209,41 @@ for sub=1:length(sel_subs)
             clear contrast_mat_tmp sel_contrast
         end
     end
-   clear con con_m tmp sel_con sel_def sel_contrast sel_mask m 
+    clear con con_m tmp sel_con sel_def sel_contrast sel_mask m
     %     %%%%%%%%% get average values for each contrast_vec x mask_vec
     %
     all_con=fieldnames(all_contrast_mat);
     for con=1:numel(all_con)
         sel_con=all_con{con};
-       sel_mat= getfield(all_contrast_mat,sel_con);
-       tmp=getfield(all_contrast_rsa,sel_con);
+        sel_mat= getfield(all_contrast_mat,sel_con);
+        tmp=getfield(all_contrast_rsa,sel_con);
         for c=1:size(sel_mat,1)
-          tmp(sub,c,1)= mean( rsa_vec(sel_mat(c,:)==1));
-          tmp(sub,c,2)= mean( rsa_vec(sel_mat(c,:)==2));
+            tmp(sub,c,1)= mean( rsa_vec(sel_mat(c,:)==1));
+            tmp(sub,c,2)= mean( rsa_vec(sel_mat(c,:)==2));
         end
-    all_contrast_rsa=setfield(all_contrast_rsa,sel_con,tmp);
-    clear tmp
+        all_contrast_rsa=setfield(all_contrast_rsa,sel_con,tmp);
+        clear tmp
     end
     % plot result
     
     
-%     
-%     fig=figure
-%     imagesc(stats.time,stats.time,squeeze(stats.stat),[-5 5])
-%     hold on
-%     colormap(jet_grey)
-%     colorbar
-%     title({[contrast];[roi];['pos tsum:',num2str(stats.trial_rand.data_pos(1)),'p=',num2str(stats.trial_rand.p_pos(1))];['neg tsum:',num2str(stats.trial_rand.data_neg(1)),'p=',num2str(stats.trial_rand.p_neg(1))]})
-%     ylabel('t in s')
-%     xlabel('t in s')
-%     contour(stats.time,stats.time,squeeze(stats.trial_rand.mask),1,'k')
-%     set(gca,'YDir','normal')
-%     %         path_fig=fullfile( folder_out,'fig');
-%     %         mkdir(path_fig)
-%     %         savefig(fig,[path_fig,'\',contrast,'_in_',roi],'compact')
-%     %
-%     %         save([path_fig,'\',contrast,'_in_',roi,'.mat'],'stats')
-%     close all
+    %
+    %     fig=figure
+    %     imagesc(stats.time,stats.time,squeeze(stats.stat),[-5 5])
+    %     hold on
+    %     colormap(jet_grey)
+    %     colorbar
+    %     title({[contrast];[roi];['pos tsum:',num2str(stats.trial_rand.data_pos(1)),'p=',num2str(stats.trial_rand.p_pos(1))];['neg tsum:',num2str(stats.trial_rand.data_neg(1)),'p=',num2str(stats.trial_rand.p_neg(1))]})
+    %     ylabel('t in s')
+    %     xlabel('t in s')
+    %     contour(stats.time,stats.time,squeeze(stats.trial_rand.mask),1,'k')
+    %     set(gca,'YDir','normal')
+    %     %         path_fig=fullfile( folder_out,'fig');
+    %     %         mkdir(path_fig)
+    %     %         savefig(fig,[path_fig,'\',contrast,'_in_',roi],'compact')
+    %     %
+    %     %         save([path_fig,'\',contrast,'_in_',roi,'.mat'],'stats')
+    %     close all
 end
 
 all_con=fieldnames(all_contrast_rsa);
@@ -289,6 +289,8 @@ close all
 
 
 %% trialcourse item specific
+colorscheme=[1 0 0; 0 0 1];
+
 co = colorscheme;
 set(groot,'defaultAxesColorOrder',co)
 cmap_default=co;
@@ -296,25 +298,59 @@ fig=figure
 hold on
 
 for ty=1:2
-x1=1:size(all_contrast_rsa.item_specific_x_trialcourse,2)
+    x1=1:size(all_contrast_rsa.item_specific_x_trialcourse,2)
     y1=squeeze(nanmean(all_contrast_rsa.item_specific_x_trialcourse(:,:,ty)));
     b1=squeeze(nanstd(all_contrast_rsa.item_specific_x_trialcourse(:,:,ty)))./sqrt(numel(sel_subs));
-   
-boundedline(x1, y1, b1, 'cmap',cmap_default(ty,:),'transparency',0.1,'alpha');
+    
+    boundedline(x1, y1, b1, 'cmap',cmap_default(ty,:),'transparency',0.1,'alpha');
 end
 legend([{'wi'},{'stde'},{'bi'},{'stde'}],'Location','northeastoutside')
 
 title('trial course  itemspecific')
 
 % add block markers
+ax_def=gca;
+plot([24 24],ax_def.YLim,'k:')
+plot([48 48],ax_def.YLim,'k:')
 
 % add cluster permutation
+data_mat=squeeze(all_contrast_rsa.item_specific_x_trialcourse(:,:,1))...
+-squeeze(all_contrast_rsa.item_specific_x_trialcourse(:,:,2));
+nrand=1000;
+
+%%%%%%get permutation from power script?????
+[h,p,~,tstat]=ttest(data_mat);
+h_neg=(h==1&tstat.tstat<0);
+[negclustermat,n_negclus] = bwlabel(h_neg);
+negclustersum(1)=1;
+for i=1:n_negclus
+    negclustersum(i)=sum(tstat.tstat(negclustermat==i));
+end
+negclustersum=sort(negclustersum,'ascend')
+h_pos=(h==1&tstat.tstat>0);
+[posclustermat,n_posclus] = bwlabel(h_pos);
+posclustersum(1)=1;
+for i=1:n_posclus
+    posclustersum(i)=sum(tstat.tstat(posclustermat==i));
+end
+posclustersum=sort(posclustersum,'descend')
+
+num_sub=size(data_mat,1);
+sign_vec=zeros(num_sub,1);
+for r=1:nrand
+    rand_vec=rand(num_sub,1);
+    sign_vec(rand_vec<0.5)=-1;
+    sign_vec(rand_vec>=0.5)=1;   
+    repmat(sign_vec,size(data_mat,2))
+
+end
+
 
 savefig(fig,fullfile(folder_fig,'itemspecifictrialcourse_effects.fig'))
 close all
 set(groot,'defaultAxesColorOrder','remove')
 
-%% figure item specific wi-bi difference 
+%% figure item specific wi-bi difference
 fig=figure
 
 rsa_mat=all_contrast_rsa.item_specific_x_block(:,:,1)-all_contrast_rsa.item_specific_x_block(:,:,2);
@@ -346,7 +382,7 @@ savefig(fig,fullfile(folder_fig,'itemspecific_halfs_effects.fig'))
 close all
 
 
-%% figure valence 
+%% figure valence
 fig=figure
 
 rsa_mat=reshape(permute(all_contrast_rsa.type1to2_vs_type2to3_x_block,[1,3,2]),numel(sel_subs),[]);
@@ -385,11 +421,11 @@ close all
 %% trialcourse valence specific
 fig =figure
 for ty=1:2
-x1=1:size(all_contrast_rsa.type1to2_vs_type2to3_x_trialcourse,2)
+    x1=1:size(all_contrast_rsa.type1to2_vs_type2to3_x_trialcourse,2)
     y1=squeeze(nanmean(all_contrast_rsa.type1to2_vs_type2to3_x_trialcourse(:,:,ty)));
     b1=squeeze(nanstd(all_contrast_rsa.type1to2_vs_type2to3_x_trialcourse(:,:,ty)))./sqrt(numel(sel_subs));
-   
-boundedline(x1, y1, b1, 'cmap',cmap_default(ty,:),'transparency',0.1,'alpha');
+    
+    boundedline(x1, y1, b1, 'cmap',cmap_default(ty,:),'transparency',0.1,'alpha');
 end
 legend([{'type1to2'},{'stde'},{'type2to3'},{'stde'}],'Location','northeastoutside')
 title('valence: trial course')
