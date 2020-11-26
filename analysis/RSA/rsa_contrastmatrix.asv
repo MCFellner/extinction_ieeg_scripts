@@ -239,7 +239,7 @@ for sub=1:length(allsubs)
                 trlinfo(trlinfo(:,2)==3,17)=trlinfo(trlinfo(:,2)==3,15)+48;
                 
                 contrast_mat3d=nan(max(trlinfo(:,17))-4,num_trial,num_trial);
-                for i=1:max(trlinfo(:,17))
+                for i=1:(max(trlinfo(:,17)))
                     min_rep=i-2
                     max_rep=i+2
                     def_vec=trlinfo(:,17)>=min_rep & trlinfo(:,17)<=max_rep;
@@ -254,9 +254,9 @@ for sub=1:length(allsubs)
                 mask_mat2=def_vec*def_vec';
                    def_vec=trlinfo(:,2)==3;
                 mask_mat3=def_vec*def_vec';
-                mask_mat= mask_mat1+ mask_mat2+ mask_mat3;
+                mask_mat=contrast_mat1+contrast_mat2+contrast_mat3;
                 
-                contrast_mat3d=contrast_mat3d.*repmat(reshape(mask_mat,[1,size(mask_mat)]),max(trlinfo(:,17)),1,1);
+                contrast_mat3d=contrast_mat3d.*repmat(mask_mat,siz)
                 contrast_mat=squeeze(nansum(contrast_mat3d,1));
                 clear mask_mat1 mask_mat2 mask_mat3 def_vec min_rep max_rep
         end
