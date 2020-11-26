@@ -1,9 +1,8 @@
 
 %rsa_mat % matrix sub x values in each sub cond
-% factors: cell array with factor names
+
 %cat_mat % cell, each column labels of a factor
 % colorscheme=repmat([1 0 0; 0 0 1]) % vector
-
 function [rmtable]=mcf_rsaclusterplot(rsa_mat,factors,cat_mat,colorscheme)
 
 
@@ -17,7 +16,7 @@ cat{i}=[cat_mat{i,:}];
 end
 
 subplot(1,2,1)
-violinplot( rsa_mat,cat,'ViolinAlpha',0.5)
+violinplot( rsa_mat,cat)
 % bar(reshape(squeeze(nanmean(all_contrast_rsa.item_specific_x_block))',1,[]))
 % hold on
 % scatter(reshape(repmat([1 2 3 4 5 6],numel(sel_subs),1),1,[]),...
@@ -35,14 +34,14 @@ end
 rsa_val = array2table(rsa_mat, 'VariableNames',varNames);
 within = array2table(cat_mat, 'VariableNames', factors);
 % fit the repeated measures model
-rm = fitrm(rsa_val,[varNames{1},'-',varNames{end},'~1'],'WithinDesign',within);
+rm = fitrm(rsa_val,'V1-V6~1','WithinDesign',within);
 model=[];
 for m=1:(numel(factors)-1)
 model=[model,factors{m},'*'];
 end
 model=[model,factors{end}];
 
-[rmtable] = ranova(rm, 'WithinModel',model);
+[rmtable] = ranova(rm, 'WithinModel','type*block');
 
 subplot(1,2,2)
 ylim([0 1])
@@ -73,6 +72,16 @@ rmtbl=cellfun(@num2str,rmtbl,'UniformOutput',0);
 num_con=size(rmtbl,1);
 spc=1/num_con;
 for i=1:num_con
-   text(0,1-(spc*i),[rownames{i},': F(',rmtbl{i,1},',',rmtbl{i,2},')=',rmtbl{i,3},' p=',rmtbl{i,4}],'FontSize',8) 
+   text(0,1-(spc*i),[]) 
 end
+text(0,0.8,['type:','F(',num2str(ranovatblb.DF('(Intercept):type')),',',...
+    num2str(ranovatblb.DF('Error(type)')),')=',num2str(ranovatblb.F('(Intercept):type')),...
+    'p=',num2str(ranovatblb.pValue('(Intercept):type'))],'FontSize',8)
+text(0,0.6,['block:','F(',num2str(ranovatblb.DF('(Intercept):block')),',',...
+    num2str(ranovatblb.DF('Error(block)')),')=',num2str(ranovatblb.F('(Intercept):block')),...
+    'p=',num2str(ranovatblb.pValue('(Intercept):block'))],'FontSize',8)
+text(0,0.4,['typexblock:','F(',num2str(ranovatblb.DF('(Intercept):type:block')),',',...
+    num2str(ranovatblb.DF('Error(type:block)')),')=',num2str(ranovatblb.F('(Intercept):type:block')),...
+    'p=',num2str(ranovatblb.pValue('(Intercept):type:block'))],'FontSize',8)
 
+clear varNames factorNames

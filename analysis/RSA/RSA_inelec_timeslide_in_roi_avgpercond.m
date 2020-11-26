@@ -29,11 +29,6 @@ allsubs = {'c_sub01','c_sub02','c_sub03','c_sub04','c_sub05','c_sub06','c_sub07'
     'p_sub01','p_sub02','p_sub03','p_sub04','p_sub05','p_sub06','p_sub07','p_sub08'};
 
 
-
-
-
-
-
 %%%%%%%%%rsa definitions
 % segment data in different trial parts
 % item window: -1 to 4 (imp
@@ -55,10 +50,7 @@ sr=1000;
 % roi='amy';
 contrast= 'item_specific';
 roi='ventraltempocci';
-
-
 % interaction hip? dmpfc?
-
 
 folder_stats=fullfile(path_out,[pow_feature,'_timeslide_',norm,'_toi',num2str(toi(1)*1000),'to',num2str(toi(2)*1000)],'stats',contrast);
 
@@ -71,7 +63,6 @@ cluster_def.stat_ty=stats.freq; % define time to ensure correct selection
 % cluster_def.type='window';
 % cluster_def.tx=[2 3]; % defined in sec start/end
 % cluster_def.ty=[2 3];
-
 
 %%%%%%%% contrasts to plots (single plot for each group)
 % every contrast gets trial course, barplots for blocks (subblocks)
@@ -264,8 +255,6 @@ addpath(genpath('D:\matlab_tools\boundedline\kakearney-boundedline-pkg-8179f9a')
 folder_fig=fullfile(folder_stats,roi,'cluster_extracted_values');
 mkdir(folder_fig)
 %% figure itemspecific
-
-
 fig=figure
 
 rsa_mat=reshape(permute(all_contrast_rsa.item_specific_x_block,[1,3,2]),numel(sel_subs),[]);
@@ -275,32 +264,37 @@ type=reshape(repmat([{'wi'},{'bi'}],3,1)',[],1);
 cat_mat=[type,block];
 colorscheme=[1 0 0; 0 0 1];
 
-table=mcf_rsaclusterplot(rsa_mat,factors,cat_mat,colorscheme);
+rmtable=mcf_rsaclusterplot(rsa_mat,factors,cat_mat,colorscheme);
 sgtitle('itemspecific x block')
 
+savefig(fig,fullfile(folder_fig,'itemspecific_effects.fig'))
+close all
+
+%% figure itemspecific half
+fig=figure
+
+rsa_mat=reshape(permute(all_contrast_rsa.item_specific_x_halfs,[1,3,2]),numel(sel_subs),[]);
+factors={'type','block','half'};
+block=reshape(repmat([{'block1'};{'block2'};{'block3'}]',4,1,1),[],1);
+type=reshape(repmat([{'wi'},{'bi'}]',6,1,1),[],1);
+half=reshape(repmat([{'first'},{'second'}],2,3,1),[],1);
+cat_mat=[type,block,half];
+colorscheme=[1 0 0; 0 0 1];
+
+rmtable=mcf_rsaclusterplot(rsa_mat,factors,cat_mat,colorscheme);
+sgtitle('itemspecific x block x halfs')
+
+savefig(fig,fullfile(folder_fig,'itemspecifichalfs_effects.fig'))
+close all
 
 
+%% trialcourse item specific
+co = colorscheme;
+set(groot,'defaultAxesColorOrder',co)
+cmap_default=co;
+fig=figure
+hold on
 
-subplot(2,3,2:3)
-cat={'wi 1block1','bi 1block1','wi 2block1','bi 2block1',...
-   'wi 1block2','bi 1block2','wi 2block2','bi 2block2',...
-   'wi 1block3','bi 1block3','wi 2block3','bi 2block3',...
-   };
-violinplot( reshape(permute(all_contrast_rsa.item_specific_x_halfs,[1,3,2]),numel(sel_subs),[]),cat)
-% bar(reshape(squeeze(nanmean(all_contrast_rsa.item_specific_x_halfs))',1,[]))
-% hold on
-% scatter(reshape(repmat(1:12,numel(sel_subs),1),1,[]),...
-% reshape(permute(all_contrast_rsa.item_specific_x_halfs,[1,3,2]),1,[]))
-% 
-% xticks(1:12)
-% xticklabels({'wi 1block1','bi 1block1','wi 2block1','bi 2block1',...
-%   'wi 1block2','bi 1block2','wi 2block2','bi 2block2',...
-%   'wi 1block3','bi 1block3','wi 2block3','bi 2block3',...
-%   })
-title('itemspecific x halfs')
-xtickangle(45)
-
-subplot(4,3,10:11)
 for ty=1:2
 x1=1:size(all_contrast_rsa.item_specific_x_trialcourse,2)
     y1=squeeze(nanmean(all_contrast_rsa.item_specific_x_trialcourse(:,:,ty)));
@@ -309,203 +303,87 @@ x1=1:size(all_contrast_rsa.item_specific_x_trialcourse,2)
 boundedline(x1, y1, b1, 'cmap',cmap_default(ty,:),'transparency',0.1,'alpha');
 end
 legend([{'wi'},{'stde'},{'bi'},{'stde'}],'Location','northeastoutside')
-title('trial course')
 
+title('trial course  itemspecific')
 
-%%%%%%%%%%stats
+% add block markers
 
+% add cluster permutation
 
+savefig(fig,fullfile(folder_fig,'itemspecifictrialcourse_effects.fig'))
+close all
+set(groot,'defaultAxesColorOrder','remove')
 
-% Create a table storing the respones
-rsa_mat=  reshape(permute(all_contrast_rsa.item_specific_x_halfs,[1,3,2]),numel(sel_subs),[]);
-for i = 1 :   size(rsa_mat,2)
-    v = strcat('V',num2str(i));    
-    varNames{i,1} = v;
-end
-rsa_val = array2table(rsa_mat, 'VariableNames',varNames);
-
-% Create the within table
-block=reshape(repmat([{'block1'};{'block2'};{'block3'}]',4,1,1),[],1);
-type=reshape(repmat([{'within'},{'between'}]',6,1,1),[],1);
-half=reshape(repmat([{'first'},{'second'}],2,3,1),[],1);
-
-factorNames = {'type','block','half'};
-within = table(type,block,half ,'VariableNames', factorNames);
-% fit the repeated measures model
-rm = fitrm(rsa_val,'V1-V12~1','WithinDesign',within);
-[ranovatblb] = ranova(rm, 'WithinModel','type*block*half');
-subplot(4,3,8:9)
-ylim([0 1.6])
-axis off
-hold on
-text(0,1.4,['anova: type x block x half'])
-text(0,1.2,['type:','F(',num2str(ranovatblb.DF('(Intercept):type')),',',...
-    num2str(ranovatblb.DF('Error(type)')),')=',num2str(ranovatblb.F('(Intercept):type')),...
-    'p=',num2str(ranovatblb.pValue('(Intercept):type'))],'FontSize',8)
-text(0,1,['half:','F(',num2str(ranovatblb.DF('(Intercept):half')),',',...
-    num2str(ranovatblb.DF('Error(half)')),')=',num2str(ranovatblb.F('(Intercept):half')),...
-    'p=',num2str(ranovatblb.pValue('(Intercept):block'))],'FontSize',8)
-text(0,0.8,['block:','F(',num2str(ranovatblb.DF('(Intercept):block')),',',...
-    num2str(ranovatblb.DF('Error(block)')),')=',num2str(ranovatblb.F('(Intercept):block')),...
-    'p=',num2str(ranovatblb.pValue('(Intercept):block'))],'FontSize',8)
-text(0,0.6,['typexblock:','F(',num2str(ranovatblb.DF('(Intercept):type:block')),',',...
-    num2str(ranovatblb.DF('Error(type:block)')),')=',num2str(ranovatblb.F('(Intercept):type:block')),...
-    'p=',num2str(ranovatblb.pValue('(Intercept):type:block'))],'FontSize',8)
-text(0,0.4,['halfxblock:','F(',num2str(ranovatblb.DF('(Intercept):block:half')),',',...
-    num2str(ranovatblb.DF('Error(block:half)')),')=',num2str(ranovatblb.F('(Intercept):block:half')),...
-    'p=',num2str(ranovatblb.pValue('(Intercept):block:half'))],'FontSize',8)
-text(0,0.2,['typexhalf:','F(',num2str(ranovatblb.DF('(Intercept):type:half')),',',...
-    num2str(ranovatblb.DF('Error(type:half)')),')=',num2str(ranovatblb.F('(Intercept):type:half')),...
-    'p=',num2str(ranovatblb.pValue('(Intercept):type:half'))],'FontSize',8)
-text(0,0.0,['halfxtypexblock:','F(',num2str(ranovatblb.DF('(Intercept):type:block:half')),',',...
-    num2str(ranovatblb.DF('Error(type:block:half)')),')=',num2str(ranovatblb.F('(Intercept):type:block:half')),...
-    'p=',num2str(ranovatblb.pValue('(Intercept):type:block:half'))],'FontSize',8)
-
-clear varNames factorNames
-
-
-savefig(fig,fullfile(folder_fig,'itemspecific_effects.fig'))
-%close all
 %% figure item specific wi-bi difference 
 fig=figure
-co = repmat([0.5 0 0.5],8,1);
-set(groot,'defaultAxesColorOrder',co)
-cmap_default=co;
-subplot(2,3,1)
 
-cat={'wi-bi block1','wi-bi block2','wi-bi block3'};
-diff_wibi=all_contrast_rsa.item_specific_x_block(:,:,1)-all_contrast_rsa.item_specific_x_block(:,:,2);
-violinplot( diff_wibi,cat)
-
-title('itemspecific x block')
-xtickangle(45)
-
-
-%%%%%%%%%%stats
-rsa_mat= diff_wibi;
-for i = 1 :   size(rsa_mat,2)
-    v = strcat('V',num2str(i));    
-    varNames{i,1} = v;
-end
-% Create a table storing the respones
-rsa_val = array2table(rsa_mat, 'VariableNames',varNames);
-% Create the within table
+rsa_mat=all_contrast_rsa.item_specific_x_block(:,:,1)-all_contrast_rsa.item_specific_x_block(:,:,2);
+factors={'block'};
 block=[{'block1'};{'block2'};{'block3'}];
+cat_mat=[block];
+colorscheme=[0.5 0 0.5];
 
-factorNames = {'block'};
-within = table(block, 'VariableNames', factorNames);
-% fit the repeated measures model
-rm = fitrm(rsa_val,'V1-V3~1','WithinDesign',within);
-[ranovatblb] = ranova(rm, 'WithinModel','block');
-subplot(4,3,7)
-ylim([0 1])
-axis off
-hold on
-text(0,1,['anova: block'])
+rmtable=mcf_rsaclusterplot(rsa_mat,factors,cat_mat,colorscheme);
+sgtitle('itemspecific x block')
 
-text(0,0.6,['block:','F(',num2str(ranovatblb.DF('(Intercept):block')),',',...
-    num2str(ranovatblb.DF('Error(block)')),')=',num2str(ranovatblb.F('(Intercept):block')),...
-    'p=',num2str(ranovatblb.pValue('(Intercept):block'))],'FontSize',8)
-
-
-clear varNames factorNames
-
-
-
-
-
-subplot(2,3,2:3)
-cat={'wi-bi 1block1','wi-bi 2block1',...
-   'wi-bi 1block2','wi-bi 2block2',...
-   'wi-bi 1block3','wi-bi 2block3',...
-   };
-diff_wibi_halfs=all_contrast_rsa.item_specific_x_halfs(:,:,1)-all_contrast_rsa.item_specific_x_halfs(:,:,2);
-
-violinplot( diff_wibi_halfs,cat)
-
-title('itemspecific x halfs')
-xtickangle(45)
-
-rsa_mat= diff_wibi_halfs;
-for i = 1 :   size(rsa_mat,2)
-    v = strcat('V',num2str(i));    
-    varNames{i,1} = v;
-end
-rsa_val = array2table(rsa_mat, 'VariableNames',varNames);
-
-% Create the within table
-block=reshape(repmat([{'block1'};{'block2'};{'block3'}]',2,1,1),[],1);
-half=reshape(repmat([{'first'},{'second'}],1,3,1),[],1);
-
-factorNames = {'block','half'};
-within = table(block,  half, 'VariableNames', factorNames);
-% fit the repeated measures model
-rm = fitrm(rsa_val,'V1-V6~1','WithinDesign',within);
-[ranovatblb] = ranova(rm, 'WithinModel','block*half');
-subplot(4,3,8:9)
-ylim([0 1.6])
-axis off
-hold on
-text(0,1.4,['anova: block x half'])
-
-text(0,1,['half:','F(',num2str(ranovatblb.DF('(Intercept):half')),',',...
-    num2str(ranovatblb.DF('Error(half)')),')=',num2str(ranovatblb.F('(Intercept):half')),...
-    'p=',num2str(ranovatblb.pValue('(Intercept):block'))],'FontSize',8)
-text(0,0.8,['block:','F(',num2str(ranovatblb.DF('(Intercept):block')),',',...
-    num2str(ranovatblb.DF('Error(block)')),')=',num2str(ranovatblb.F('(Intercept):block')),...
-    'p=',num2str(ranovatblb.pValue('(Intercept):block'))],'FontSize',8)
-text(0,0.4,['halfxblock:','F(',num2str(ranovatblb.DF('(Intercept):block:half')),',',...
-    num2str(ranovatblb.DF('Error(block:half)')),')=',num2str(ranovatblb.F('(Intercept):block:half')),...
-    'p=',num2str(ranovatblb.pValue('(Intercept):block:half'))],'FontSize',8)
-
-
-clear varNames factorNames
-
-
-
-
-savefig(fig,fullfile(folder_fig,'itemspecificdiff_effects.fig'))
+savefig(fig,fullfile(folder_fig,'itemspecific_block_effects.fig'))
 close all
+
+%% figure itemspecific half differences
+fig=figure
+
+rsa_mat=all_contrast_rsa.item_specific_x_halfs(:,:,1)-all_contrast_rsa.item_specific_x_halfs(:,:,2);
+factors={'block','half'};
+block=reshape(repmat([{'block1'};{'block2'};{'block3'}]',2,1),[],1);
+half=reshape(repmat([{'first'},{'second'}],1,3,1),[],1);
+cat_mat=[block,half];
+colorscheme=[1 0 0; 0 0 1];
+
+rmtable=mcf_rsaclusterplot(rsa_mat,factors,cat_mat,colorscheme);
+sgtitle('itemspecific x halfs')
+
+savefig(fig,fullfile(folder_fig,'itemspecific_halfs_effects.fig'))
+close all
+
 
 %% figure valence 
 fig=figure
-co = repmat([0 0.5 0.5; 0.5 0.5 1],8,1);
-set(groot,'defaultAxesColorOrder',co)
-cmap_default=co;
-subplot(2,3,1)
 
-cat={'type1to2 block1','type2to3 block1','type1to2 block2','type2to3 block2','type1to2 block3','type2to3 block3'};
-violinplot( reshape(permute(all_contrast_rsa.type1to2_vs_type2to3_x_block,[1,3,2]),numel(sel_subs),[]),cat)
-% bar(reshape(squeeze(nanmean(all_contrast_rsa.item_specific_x_block))',1,[]))
-% hold on
-% scatter(reshape(repmat([1 2 3 4 5 6],numel(sel_subs),1),1,[]),...
-% reshape(permute(all_contrast_rsa.type1to2_vs_type2to3_x_block,[1,3,2]),1,[]))
-% xticks(1:6)
-% xticklabels({'type1to2 block1','type2to3 block1','type1to2 block2','type2to3 block2','type1to2 block3','type2to3 block3'})
-title('valence specific x block')
-xtickangle(45)
+rsa_mat=reshape(permute(all_contrast_rsa.type1to2_vs_type2to3_x_block,[1,3,2]),numel(sel_subs),[]);
+factors={'type','block'};
 
+block=reshape(repmat([{'block1'};{'block2'};{'block3'}]',2,1),[],1);
+type=reshape(repmat([{'1to2'},{'2to3'}],3,1)',[],1);
+cat_mat=[type,block];
+colorscheme=[0 0.5 0.5; 0.5 0.5 1];
 
-subplot(2,3,2:3)
-cat={'type1to2 1block1','type2to3 1block1','type1to2 2block1','type2to3 2block1',...
-   'type1to2 1block2','type2to3 1block2','type1to2 2block2','type2to3 2block2',...
-   'type1to2 1block3','type2to3 1block3','type1to2 2block3','type2to3 2block3',...
-   }
-violinplot( reshape(permute(all_contrast_rsa.type1to2_vs_type2to3_x_halfs,[1,3,2]),numel(sel_subs),[]),cat)
-% bar(reshape(squeeze(nanmean(all_contrast_rsa.type1to2_vs_type2to3_x_halfs))',1,[]))
-% hold on
-% scatter(reshape(repmat(1:12,numel(sel_subs),1),1,[]),...
-% reshape(permute(all_contrast_rsa.type1to2_vs_type2to3_x_halfs,[1,3,2]),1,[]))
-% 
-% xticks(1:12)
-% xticklabels({'type1to2 1block1','type2to3 1block1','type1to2 2block1','type2to3 2block1',...
-%   'type1to2 1block2','type2to3 1block2','type1to2 2block2','type2to3 2block2',...
-%   'type1to2 1block3','type2to3 1block3','type1to2 2block3','type2to3 2block3',...
-%   })
-title('valencespecific x halfs')
-xtickangle(45)
+rmtable=mcf_rsaclusterplot(rsa_mat,factors,cat_mat,colorscheme);
+sgtitle('valence specific x block')
 
-subplot(4,2,7:8)
+savefig(fig,fullfile(folder_fig,'valencespecific_effects.fig'))
+close all
+
+%% figure valence x half
+fig=figure
+
+rsa_mat=reshape(permute(all_contrast_rsa.type1to2_vs_type2to3_x_halfs,[1,3,2]),numel(sel_subs),[]);
+factors={'type','block','half'};
+
+block=reshape(repmat([{'block1'};{'block2'};{'block3'}]',4,1),[],1);
+type=reshape(repmat([{'1to2'},{'2to3'}],6,1)',[],1);
+half=reshape(repmat([{'first'},{'second'}],2,3,1),[],1);
+
+cat_mat=[type,block,half];
+colorscheme=[0 0.5 0.5; 0.5 0.5 1];
+
+rmtable=mcf_rsaclusterplot(rsa_mat,factors,cat_mat,colorscheme);
+sgtitle('valence specific x half x block')
+
+savefig(fig,fullfile(folder_fig,'valencespecifichalf_effects.fig'))
+close all
+
+%% trialcourse valence specific
+fig =figure
 for ty=1:2
 x1=1:size(all_contrast_rsa.type1to2_vs_type2to3_x_trialcourse,2)
     y1=squeeze(nanmean(all_contrast_rsa.type1to2_vs_type2to3_x_trialcourse(:,:,ty)));
@@ -516,192 +394,37 @@ end
 legend([{'type1to2'},{'stde'},{'type2to3'},{'stde'}],'Location','northeastoutside')
 title('valence: trial course')
 
-%%%%%%%%%%stats
-rsa_mat=reshape(permute(all_contrast_rsa.type1to2_vs_type2to3_x_block,[1,3,2]),numel(sel_subs),[]);
-for i = 1 :   size(rsa_mat,2)
-    v = strcat('V',num2str(i));    
-    varNames{i,1} = v;
-end
-% Create a table storing the respones
-rsa_val = array2table(rsa_mat, 'VariableNames',varNames);
-clear varNames
-% Create the within table
-block=reshape(repmat([{'block1'};{'block2'};{'block3'}]',2,1),[],1);
-type=reshape(repmat([{'within'},{'between'}],3,1)',[],1);
+close all
+%% figure valence diff
 
-factorNames = {'type','block'};
-within = table(type, block, 'VariableNames', factorNames);
-% fit the repeated measures model
-rm = fitrm(rsa_val,'V1-V6~1','WithinDesign',within);
-[ranovatblb] = ranova(rm, 'WithinModel','type*block');
-
-subplot(4,3,7)
-ylim([0 1])
-axis off
-hold on
-text(0,1,['anova: type x block'])
-text(0,0.8,['type:','F(',num2str(ranovatblb.DF('(Intercept):type')),',',...
-    num2str(ranovatblb.DF('Error(type)')),')=',num2str(ranovatblb.F('(Intercept):type')),...
-    'p=',num2str(ranovatblb.pValue('(Intercept):type'))],'FontSize',8)
-text(0,0.6,['block:','F(',num2str(ranovatblb.DF('(Intercept):block')),',',...
-    num2str(ranovatblb.DF('Error(block)')),')=',num2str(ranovatblb.F('(Intercept):block')),...
-    'p=',num2str(ranovatblb.pValue('(Intercept):block'))],'FontSize',8)
-text(0,0.4,['typexblock:','F(',num2str(ranovatblb.DF('(Intercept):type:block')),',',...
-    num2str(ranovatblb.DF('Error(type:block)')),')=',num2str(ranovatblb.F('(Intercept):type:block')),...
-    'p=',num2str(ranovatblb.pValue('(Intercept):type:block'))],'FontSize',8)
-clear varNames factorNames
-
-
-
-
-% Create a table storing the respones
-rsa_mat= reshape(permute(all_contrast_rsa.type1to2_vs_type2to3_x_halfs,[1,3,2]),numel(sel_subs),[]);
-for i = 1 :   size(rsa_mat,2)
-    v = strcat('V',num2str(i));    
-    varNames{i,1} = v;
-end
-rsa_val = array2table(rsa_mat, 'VariableNames',varNames);
-
-% Create the within table
-block=reshape(repmat([{'block1'};{'block2'};{'block3'}]',4,1,1),[],1);
-type=reshape(repmat([{'within'},{'between'}]',6,1,1),[],1);
-half=reshape(repmat([{'first'},{'second'}],2,3,1),[],1);
-
-
-factorNames = {'block','type','half'};
-within = table(block, type, half, 'VariableNames', factorNames);
-% fit the repeated measures model
-rm = fitrm(rsa_val,'V1-V12~1','WithinDesign',within);
-[ranovatblb] = ranova(rm, 'WithinModel','type*block*half');
-subplot(4,3,8:9)
-ylim([0 1.6])
-axis off
-hold on
-text(0,1.4,['anova: type x block x half'])
-text(0,1.2,['type:','F(',num2str(ranovatblb.DF('(Intercept):type')),',',...
-    num2str(ranovatblb.DF('Error(type)')),')=',num2str(ranovatblb.F('(Intercept):type')),...
-    'p=',num2str(ranovatblb.pValue('(Intercept):type'))],'FontSize',8)
-text(0,1,['half:','F(',num2str(ranovatblb.DF('(Intercept):half')),',',...
-    num2str(ranovatblb.DF('Error(half)')),')=',num2str(ranovatblb.F('(Intercept):half')),...
-    'p=',num2str(ranovatblb.pValue('(Intercept):block'))],'FontSize',8)
-text(0,0.8,['block:','F(',num2str(ranovatblb.DF('(Intercept):block')),',',...
-    num2str(ranovatblb.DF('Error(block)')),')=',num2str(ranovatblb.F('(Intercept):block')),...
-    'p=',num2str(ranovatblb.pValue('(Intercept):block'))],'FontSize',8)
-text(0,0.6,['typexblock:','F(',num2str(ranovatblb.DF('(Intercept):block:type')),',',...
-    num2str(ranovatblb.DF('Error(block:type)')),')=',num2str(ranovatblb.F('(Intercept):block:type')),...
-    'p=',num2str(ranovatblb.pValue('(Intercept):block:type'))],'FontSize',8)
-text(0,0.4,['halfxblock:','F(',num2str(ranovatblb.DF('(Intercept):block:half')),',',...
-    num2str(ranovatblb.DF('Error(block:half)')),')=',num2str(ranovatblb.F('(Intercept):block:half')),...
-    'p=',num2str(ranovatblb.pValue('(Intercept):block:half'))],'FontSize',8)
-text(0,0.2,['typexhalf:','F(',num2str(ranovatblb.DF('(Intercept):type:half')),',',...
-    num2str(ranovatblb.DF('Error(type:half)')),')=',num2str(ranovatblb.F('(Intercept):type:half')),...
-    'p=',num2str(ranovatblb.pValue('(Intercept):type:half'))],'FontSize',8)
-text(0,0.0,['halfxtypexblock:','F(',num2str(ranovatblb.DF('(Intercept):block:type:half')),',',...
-    num2str(ranovatblb.DF('Error(block:type:half)')),')=',num2str(ranovatblb.F('(Intercept):block:type:half')),...
-    'p=',num2str(ranovatblb.pValue('(Intercept):block:type:half'))],'FontSize',8)
-clear varNames factorNames
-
-savefig(fig,fullfile(folder_fig,'valencepecific_effects.fig'))
-%close all
-%% figure valence for halfs
 fig=figure
-co = repmat([1 0 0.5],8,1);
-set(groot,'defaultAxesColorOrder',co)
-cmap_default=co;
-subplot(2,3,1)
 
-cat={'val block1','val block2','val block3'};
-diff_val=all_contrast_rsa.type1to2_vs_type2to3_x_block(:,:,1)-all_contrast_rsa.type1to2_vs_type2to3_x_block(:,:,2);
-violinplot( diff_val,cat)
+rsa_mat=all_contrast_rsa.type1to2_vs_type2to3_x_block(:,:,1)-all_contrast_rsa.type1to2_vs_type2to3_x_block(:,:,2);
+factors={'block'};
 
-title('valencespecific x block')
-xtickangle(45)
-
-
-%%%%%%%%%%stats
-rsa_mat= diff_val;
-for i = 1 :   size(rsa_mat,2)
-    v = strcat('V',num2str(i));    
-    varNames{i,1} = v;
-end
-% Create a table storing the respones
-rsa_val = array2table(rsa_mat, 'VariableNames',varNames);
-% Create the within table
 block=[{'block1'};{'block2'};{'block3'}];
+cat_mat=[block];
+colorscheme=[1 0 0.5];
 
-factorNames = {'block'};
-within = table(block, 'VariableNames', factorNames);
-% fit the repeated measures model
-rm = fitrm(rsa_val,'V1-V3~1','WithinDesign',within);
-[ranovatblb] = ranova(rm, 'WithinModel','block');
-subplot(4,3,7)
-ylim([0 1])
-axis off
-hold on
-text(0,1,['anova: block'])
+rmtable=mcf_rsaclusterplot(rsa_mat,factors,cat_mat,colorscheme);
+sgtitle('valence specific x block')
 
-text(0,0.6,['block:','F(',num2str(ranovatblb.DF('(Intercept):block')),',',...
-    num2str(ranovatblb.DF('Error(block)')),')=',num2str(ranovatblb.F('(Intercept):block')),...
-    'p=',num2str(ranovatblb.pValue('(Intercept):block'))],'FontSize',8)
-
-
-clear varNames factorNames
-
-
-
-
-
-subplot(2,3,2:3)
-cat={'val 1block1','val 2block1',...
-   'val 1block2','val 2block2',...
-   'val 1block3','val 2block3',...
-   };
-diff_val_halfs=all_contrast_rsa.type1to2_vs_type2to3_x_halfs(:,:,1)-all_contrast_rsa.type1to2_vs_type2to3_x_halfs(:,:,2);
-
-violinplot( diff_val_halfs,cat)
-
-title('valspecific x halfs')
-xtickangle(45)
-
-rsa_mat= diff_val_halfs;
-for i = 1 :   size(rsa_mat,2)
-    v = strcat('V',num2str(i));    
-    varNames{i,1} = v;
-end
-rsa_val = array2table(rsa_mat, 'VariableNames',varNames);
-
-% Create the within table
-block=reshape(repmat([{'block1'};{'block2'};{'block3'}]',2,1,1),[],1);
-half=reshape(repmat([{'first'},{'second'}],1,3,1),[],1);
-
-factorNames = {'block','half'};
-within = table(block,  half, 'VariableNames', factorNames);
-% fit the repeated measures model
-rm = fitrm(rsa_val,'V1-V6~1','WithinDesign',within);
-[ranovatblb] = ranova(rm, 'WithinModel','block*half');
-subplot(4,3,8:9)
-ylim([0 1.6])
-axis off
-hold on
-text(0,1.4,['anova: block x half'])
-
-text(0,1,['half:','F(',num2str(ranovatblb.DF('(Intercept):half')),',',...
-    num2str(ranovatblb.DF('Error(half)')),')=',num2str(ranovatblb.F('(Intercept):half')),...
-    'p=',num2str(ranovatblb.pValue('(Intercept):block'))],'FontSize',8)
-text(0,0.8,['block:','F(',num2str(ranovatblb.DF('(Intercept):block')),',',...
-    num2str(ranovatblb.DF('Error(block)')),')=',num2str(ranovatblb.F('(Intercept):block')),...
-    'p=',num2str(ranovatblb.pValue('(Intercept):block'))],'FontSize',8)
-text(0,0.4,['halfxblock:','F(',num2str(ranovatblb.DF('(Intercept):block:half')),',',...
-    num2str(ranovatblb.DF('Error(block:half)')),')=',num2str(ranovatblb.F('(Intercept):block:half')),...
-    'p=',num2str(ranovatblb.pValue('(Intercept):block:half'))],'FontSize',8)
-
-
-clear varNames factorNames
-
-
-savefig(fig,fullfile(folder_fig,'valencespecificdiff_effects.fig'))
+savefig(fig,fullfile(folder_fig,'valencespecific_block_effects.fig'))
 close all
 
+%% figure valence diff halfs
 
+fig=figure
 
-set(groot,'defaultAxesColorOrder','remove')
+rsa_mat=all_contrast_rsa.type1to2_vs_type2to3_x_halfs(:,:,1)-all_contrast_rsa.type1to2_vs_type2to3_x_halfs(:,:,2);
+factors={'block','half'};
+block=reshape(repmat([{'block1'};{'block2'};{'block3'}]',2,1,1),[],1);
+half=reshape(repmat([{'first'},{'second'}],1,3,1),[],1);cat_mat=[block];
+colorscheme=[1 0 0.5];
+cat_mat=[block,half];
+
+rmtable=mcf_rsaclusterplot(rsa_mat,factors,cat_mat,colorscheme);
+sgtitle('valence specific: halfs x block')
+
+savefig(fig,fullfile(folder_fig,'valencespecific_halfs_effects.fig'))
+close all
