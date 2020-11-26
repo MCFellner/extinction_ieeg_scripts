@@ -240,8 +240,8 @@ for sub=1:length(allsubs)
                 
                 contrast_mat3d=nan(max(trlinfo(:,17))-4,num_trial,num_trial);
                 for i=1:max(trlinfo(:,17))
-                    min_rep=i-2
-                    max_rep=i+2
+                    min_rep=i-2;
+                    max_rep=i+2;
                     def_vec=trlinfo(:,17)>=min_rep & trlinfo(:,17)<=max_rep;
                     contrast_mat3d(i,:,:)=contrast_mat+(def_vec*def_vec');
                 end
