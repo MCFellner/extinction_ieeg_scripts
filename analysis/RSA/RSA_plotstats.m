@@ -7,8 +7,8 @@ addpath('D:\Extinction\iEEG\extinction_ieeg_scripts\additional_functions')
 %plot results of rsa stats in organized plots
 
 % file definition
-path_stats='D:\Extinction\iEEG\analysis\rsa\powlogscale_timeslide_z_crosstrials_toi3500to5000\stats';
-path_out='D:\Extinction\iEEG\analysis\rsa\powlogscale_timeslide_z_crosstrials_toi3500to5000\';
+path_stats='D:\Extinction\iEEG\analysis\rsa\powlogscale_timeslide_z_crosstrials_toi2000to3000\stats';
+path_out='D:\Extinction\iEEG\analysis\rsa\powlogscale_timeslide_z_crosstrials_toi2000to3000\';
 
 % adapt file definition to load the wanted files
 
