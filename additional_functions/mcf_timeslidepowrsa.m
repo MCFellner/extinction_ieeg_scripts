@@ -109,8 +109,29 @@ freq=ft_freqanalysis(cfg_freq,data);
 clear data
 freq.phase=angle(freq.fourierspctrm);
 
+num_chan=numel(freq.label);
+num_tois=numel(tois);
+num_trial=size(freq.trialinfo,1);
+num_freq=numel(freq.freq);
 % organize data to create rsa_mat (for phase: freqxtrialxtrial)
 % vectorize channels
-tmp_vec=permute(freq.phase,[1,4,3,2]);% trial x bin x chan x freq
-tmp_vec=reshape(tmp_vec,[],num_chan*numel(tois));
+tmp_vec=permute(freq.phase,[1,3,2,4]);% trial x bin x chan x freq
+tmp_vec=reshape(tmp_vec,[],num_chan*num_tois);
+corr_mat=zeros(size(tmp_vec,1));
+for i=1:size(tmp_vec,1)
+ tmp_vec2=repmat(tmp_vec(i,:),size(tmp_vec,1),1);
+corr_mat(i,:)=circ_corrcc_mat(tmp_vec',tmp_vec2');
+end
+corr_mat=0.5.*log(((ones(size(corr_mat))+corr_mat)./(ones(size(corr_mat))-corr_mat)));
+corr_mat=reshape(corr_mat,num_trial,num_freq,num_trial,num_freq);
+corr_mat=permute(corr_mat,[1,3,2,4]);
+
+rsa.rsa_mat=corr_mat;
+rsa.dim='trial_trial_freq_freq';
+%rsa.dim='trial_time_time';
+rsa.freq=freq.freq;
+rsa.trialinfo=freq.trialinfo;
+rsa.cfg=cfg_rsa;
+rsa.roi=cfg_rsa.roi;
+
 end

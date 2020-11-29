@@ -1,7 +1,7 @@
 addpath('D:\matlab_tools\fieldtrip-20200130')
 ft_defaults
 addpath('D:\Extinction\iEEG\extinction_ieeg_scripts\additional_functions')
-
+addpath('D:\matlab_tools\CircStat')
 %% rsa for iEEG
 
 path_info='D:\Extinction\iEEG\data\preproc\ieeg\datainfo\';
@@ -15,11 +15,6 @@ allsubs = {'c_sub01','c_sub02','c_sub03','c_sub04','c_sub05','c_sub06','c_sub07'
     'p_sub01','p_sub02','p_sub03','p_sub04','p_sub05','p_sub06','p_sub07','p_sub08'};
 
 
-
-contrasts={'video_specific_mask_block1','video_specific_mask_block2','video_specific_mask_block3',...
-            'video_specific_mask_block1_interaction_video_specific_mask_block2',...       
-            'video_specific_mask_block1_interaction_video_specific_mask_block3',...       
-            'video_specific_mask_block2_interaction_video_specific_mask_block3'};       
 
 
 
@@ -57,8 +52,8 @@ all_roi.hip={'Right-Hippocampus','Left-Hippocampus'};
 
 rois=fieldnames(all_roi);
 
-for cons=1:numel(contrasts)
-            contrast=contrasts{cons};
+% for cons=1:numel(contrasts)
+%             contrast=contrasts{cons};
 
     for r=1:numel(rois)
         roi=rois{r};
@@ -68,7 +63,7 @@ for cons=1:numel(contrasts)
         %%%%%%%%%%%%%%
         load('D:\matlab_tools\jet_grey.mat')
         
-        folder_out=fullfile(path_out,[pow_feature,'_timeslide_',norm,'_toi',num2str(toi(1)*1000),'to',num2str(toi(2)*1000)],'stats',contrast);
+        folder_out=fullfile(path_out,[pow_feature,'_timeslide_',norm,'_toi',num2str(toi(1)*1000),'to',num2str(toi(2)*1000)],'rsa_mat');
         mkdir(folder_out)
         
         % for every sub check for elecs in the roi (then run rsa/stats)
@@ -138,52 +133,52 @@ for cons=1:numel(contrasts)
             cfg_rsa.roi=roi;
             rsa=mcf_timeslidepowrsa(cfg_rsa,data)
             
-            % get condition and rand contrasts
-            cfg_con.generate_rand='yes';
-            cfg_con.nrand=nrand;
-            cfg_con.contrast_mat=contrast_mat;
-            cfg_con.sortind=contrast_def.sortind_org2usedtrlinfo;
-            [rsa_cond]=mcf_rsacontrasts(cfg_con,rsa);
-            
-            rsa_ga.cond_rsa(sub,:,:,:)=rsa_cond.cond_rsa;
-            rsa_ga.rand_rsa(sub,:,:,:,:)=rsa_cond.rand_rsa;
-            
-            %      save(fullfile(folder_out,strcat(sel_sub,'_rsastat')),'all_stat')
-            %  clear all_stat
+           save(fullfile(folder_out,strcat(sel_sub,'_rsa')),'rsa')
+             clear rsa
         end
-        rsa_ga.time=rsa_cond.time;
-        rsa_ga.t1=rsa_cond.t1;
-        rsa_ga.t2=rsa_cond.t2;
-        rsa_ga.dim_cond='subj_cond_time_time';
-        rsa_ga.dim_rand='subj_cond_rand_time_time';
-        rsa_ga.roi=rsa_cond.roi;
-        
-        % run data stats (using ft_freqstats)
-        cfg_stats.nrand=nrand;
-        cfg_stats.permutation='yes';
-        cfg_stats.twosidedtest='yes'
-
-        stats=mcf_rsacondstats(cfg_stats,rsa_ga)
-        
-        % plot result
-        fig=figure
-        imagesc(stats.time,stats.time,squeeze(stats.stat),[-5 5])
-        hold on
-        colormap(jet_grey)
-        colorbar
-        title({[contrast];[roi];['pos tsum:',num2str(stats.trial_rand.data_pos(1)),'p=',num2str(stats.trial_rand.p_pos(1))];['neg tsum:',num2str(stats.trial_rand.data_neg(1)),'p=',num2str(stats.trial_rand.p_neg(1))]})
-        ylabel('t in s')
-        xlabel('t in s')
-        contour(stats.time,stats.time,squeeze(stats.trial_rand.mask),1,'k')
-        set(gca,'YDir','normal')
-        path_fig=fullfile( folder_out,'fig');
-        mkdir(path_fig)
-        savefig(fig,[path_fig,'\',contrast,'_in_',roi],'compact')
-        
-        save([path_fig,'\',contrast,'_in_',roi,'.mat'],'stats')
-        close all
     end
-end
+    
+%%    
+    
+%     contrasts={'video_specific_mask_block1','video_specific_mask_block2','video_specific_mask_block3',...
+%             'video_specific_mask_block1_interaction_video_specific_mask_block2',...       
+%             'video_specific_mask_block1_interaction_video_specific_mask_block3',...       
+%             'video_specific_mask_block2_interaction_video_specific_mask_block3'};       
+% 
+
+%         rsa_ga.time=rsa_cond.time;
+%         rsa_ga.t1=rsa_cond.t1;
+%         rsa_ga.t2=rsa_cond.t2;
+%         rsa_ga.dim_cond='subj_cond_time_time';
+%         rsa_ga.dim_rand='subj_cond_rand_time_time';
+%         rsa_ga.roi=rsa_cond.roi;
+%         
+%         % run data stats (using ft_freqstats)
+%         cfg_stats.nrand=nrand;
+%         cfg_stats.permutation='yes';
+%         cfg_stats.twosidedtest='yes'
+% 
+%         stats=mcf_rsacondstats(cfg_stats,rsa_ga)
+%         
+%         % plot result
+%         fig=figure
+%         imagesc(stats.time,stats.time,squeeze(stats.stat),[-5 5])
+%         hold on
+%         colormap(jet_grey)
+%         colorbar
+%         title({[contrast];[roi];['pos tsum:',num2str(stats.trial_rand.data_pos(1)),'p=',num2str(stats.trial_rand.p_pos(1))];['neg tsum:',num2str(stats.trial_rand.data_neg(1)),'p=',num2str(stats.trial_rand.p_neg(1))]})
+%         ylabel('t in s')
+%         xlabel('t in s')
+%         contour(stats.time,stats.time,squeeze(stats.trial_rand.mask),1,'k')
+%         set(gca,'YDir','normal')
+%         path_fig=fullfile( folder_out,'fig');
+%         mkdir(path_fig)
+%         savefig(fig,[path_fig,'\',contrast,'_in_',roi],'compact')
+%         
+%         save([path_fig,'\',contrast,'_in_',roi,'.mat'],'stats')
+%         close all
+%     end
+% end
 
 
 
