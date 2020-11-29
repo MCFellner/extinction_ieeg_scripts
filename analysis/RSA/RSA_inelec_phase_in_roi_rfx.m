@@ -49,11 +49,7 @@ nrand=1000;
 all_roi.amy={'Left-Amygdala','Right-Amygdala'};
 all_roi.hip={'Right-Hippocampus','Left-Hippocampus'};
 
-
 rois=fieldnames(all_roi);
-
-% for cons=1:numel(contrasts)
-%             contrast=contrasts{cons};
 
     for r=1:numel(rois)
         roi=rois{r};
@@ -98,9 +94,6 @@ rois=fieldnames(all_roi);
         for sub=1:length(sel_subs)
             sel_sub=sel_subs{sub};
             sub_ind=find(strcmp(sel_sub,allsubs));
-            load(fullfile(path_designmat,strcat(sel_sub,'_contrast_mat_sym')))
-            %contrast_mat=getfield(contrast_def,contrast);
-            contrast_mat=mcf_contrastmatdef(contrast_def,contrast);
             
             
             % electrodeinfo
@@ -145,7 +138,13 @@ rois=fieldnames(all_roi);
 %             'video_specific_mask_block1_interaction_video_specific_mask_block3',...       
 %             'video_specific_mask_block2_interaction_video_specific_mask_block3'};       
 % 
-
+% for cons=1:numel(contrasts)
+%             contrast=contrasts{cons};
+% 
+% 
+%             load(fullfile(path_designmat,strcat(sel_sub,'_contrast_mat_sym')))
+%             %contrast_mat=getfield(contrast_def,contrast);
+%             contrast_mat=mcf_contrastmatdef(contrast_def,contrast);
 %         rsa_ga.time=rsa_cond.time;
 %         rsa_ga.t1=rsa_cond.t1;
 %         rsa_ga.t2=rsa_cond.t2;

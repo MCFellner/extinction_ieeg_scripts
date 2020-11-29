@@ -39,7 +39,7 @@ all_contrasts{1}.toi=[2 3];
 
 all_contrasts{2}.contrast= 'type1to2_vs_type2to3_mask_block1_interaction_type1to2_vs_type2to3_mask_block2';
 all_contrasts{2}.roi='amy';
-all_contrasts{2}.toi=[2 3.7];
+all_contrasts{2}.toi=[2 3.8];
 
 all_contrasts{3}.contrast= 'item_specific_mask_block1_interaction_item_specific_mask_block2';
 all_contrasts{3}.roi='ifg';
@@ -47,15 +47,15 @@ all_contrasts{3}.toi=[2 3];
 
 all_contrasts{4}.contrast= 'item_specific_mask_block1_interaction_item_specific_mask_block2';
 all_contrasts{4}.roi='ifg';
-all_contrasts{4}.toi=[2 3.7];
+all_contrasts{4}.toi=[2 3.8];
 
 all_contrasts{5}.contrast= 'item_specific_mask_block1_interaction_item_specific_mask_block2';
 all_contrasts{5}.roi='dm_pfc';
-all_contrasts{5}.toi=[2 3.7];
+all_contrasts{5}.toi=[2 3.8];
 
 all_contrasts{6}.contrast= 'type1to2_vs_type2to3_mask_block1_interaction_type1to2_vs_type2to3_mask_block2';
 all_contrasts{6}.roi='dm_pfc';
-all_contrasts{6}.toi=[2 3.7];
+all_contrasts{6}.toi=[2 3.8];
 
 all_contrasts{7}.contrast= 'type1to2_vs_type2to3_mask_block1_interaction_type1to2_vs_type2to3_mask_block2';
 all_contrasts{7}.roi='dm_pfc';
@@ -63,7 +63,7 @@ all_contrasts{7}.toi=[2 3];
 
 all_contrasts{8}.contrast= 'type1to2_vs_type2to3_mask_block1_interaction_type1to2_vs_type2to3_mask_block2';
 all_contrasts{8}.roi='hip_r';
-all_contrasts{8}.toi=[2 3.7];
+all_contrasts{8}.toi=[2 3.8];
 
 all_contrasts{9}.contrast= 'item_specific';
 all_contrasts{9}.roi='ventraltempocci';
@@ -71,7 +71,7 @@ all_contrasts{9}.toi=[2 3];
 
 all_contrasts{10}.contrast= 'item_specific';
 all_contrasts{10}.roi='ventraltempocci';
-all_contrasts{10}.toi=[2 3.7];
+all_contrasts{10}.toi=[2 3.8];
   %%
 for con_clus=1:numel(all_contrasts)
     contrast= all_contrasts{con_clus}.contrast;
