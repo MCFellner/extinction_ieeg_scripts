@@ -199,6 +199,7 @@ switch rsa.dim
                     cfg=[];
                     cfg.avgoverchan =  'yes';
                     cfg.avgovertime =  'no';
+                    cfg.avgoverfreq =  'no';
                     
                     % first level
                     cfg.method           = 'montecarlo';
@@ -216,7 +217,7 @@ switch rsa.dim
                     cfg.uvar     = 2;
                     cfg.ivar     = 1;
                     cfg.design = design;
-                    stat_rand=ft_timelockstatistics (cfg,data1,data2);
+                    stat_rand=ft_freqstatistics (cfg,data1,data2);
                     % get pos/neg clusters for each random
                     rand_pos(i)=0;
                     rand_neg(i)=0;
@@ -281,7 +282,6 @@ switch rsa.dim
                 stats.trial_rand.rand_neg=rand_neg;
                 stats.trial_rand.data_pos=data_pos;
                 stats.trial_rand.data_neg=data_neg;
-                
             otherwise
         end
 end

@@ -171,11 +171,11 @@ rois=fieldnames(all_roi);
         
         folder_rsa=fullfile(path_out,[pow_feature,'_timeslide_',norm,'_toi',num2str(toi(1)*1000),'to',num2str(toi(2)*1000)],roi,'rsa_mat');   
         all_subs=dir([folder_rsa,'\*.mat']);
-        all_subs={all_subs(:).name(1:end-8)};
+        all_subs={all_subs(:).name};
 for cons=1:numel(contrasts)
             contrast=contrasts{cons};
         for sub=1:numel(all_subs)
-            sel_sub=all_subs{sub};
+            sel_sub=all_subs{sub}(1:end-8);
             load(fullfile(path_designmat,strcat(sel_sub,'_contrast_mat_sym')))
             load(fullfile(folder_rsa,[sel_sub,'_rsa.mat']))
 
@@ -190,22 +190,20 @@ for cons=1:numel(contrasts)
             cfg_con.sortind=contrast_def.sortind_org2usedtrlinfo;
             [rsa_cond]=mcf_rsacontrasts(cfg_con,rsa);
             
-            rsa_ga.cond_rsa(sub,:,:,:)=rsa_cond.cond_rsa;
-            rsa_ga.rand_rsa(sub,:,:,:,:)=rsa_cond.rand_rsa;
+            rsa_ga.cond_rsa(sub,:,:)=rsa_cond.cond_rsa;
+            rsa_ga.rand_rsa(sub,:,:,:)=rsa_cond.rand_rsa;
         end
-%         rsa_ga.time=rsa_cond.time;
-%         rsa_ga.t1=rsa_cond.t1;
-%         rsa_ga.t2=rsa_cond.t2;
-%         rsa_ga.dim_cond='subj_cond_time_time';
-%         rsa_ga.dim_rand='subj_cond_rand_time_time';
-%         rsa_ga.roi=rsa_cond.roi;
-%         
-%         % run data stats (using ft_freqstats)
-%         cfg_stats.nrand=nrand;
-%         cfg_stats.permutation='yes';
-%         cfg_stats.twosidedtest='yes'
-% 
-%         stats=mcf_rsacondstats(cfg_stats,rsa_ga)
+        rsa_ga.freq=rsa_cond.freq;
+        rsa_ga.dim_cond='subj_cond_freq';
+        rsa_ga.dim_rand='subj_cond_rand_freq';
+        rsa_ga.roi=rsa_cond.roi;
+        
+        % run data stats (using ft_freqstats)
+        cfg_stats.nrand=nrand;
+        cfg_stats.permutation='yes';
+        cfg_stats.twosidedtest='yes'
+
+        stats=mcf_rsacondstats(cfg_stats,rsa_ga)
 %         
 %         % plot result
 %         fig=figure
