@@ -132,19 +132,67 @@ rois=fieldnames(all_roi);
     end
     
 %%    
-    
-%     contrasts={'video_specific_mask_block1','video_specific_mask_block2','video_specific_mask_block3',...
-%             'video_specific_mask_block1_interaction_video_specific_mask_block2',...       
-%             'video_specific_mask_block1_interaction_video_specific_mask_block3',...       
-%             'video_specific_mask_block2_interaction_video_specific_mask_block3'};       
+ path_info='D:\Extinction\iEEG\data\preproc\ieeg\datainfo\';
+path_preproc='D:\Extinction\iEEG\data\preproc\ieeg\readin\';
+path_out='D:\Extinction\iEEG\analysis\rsa\';
+path_designmat='D:\Extinction\iEEG\analysis\rsa\contrast_mat\';
+
+toi=[0 3];
+pow_feature='phase';
+norm='no_norm';
+nrand=1000;
+
+    contrasts={'video_specific_mask_block1','video_specific_mask_block2','video_specific_mask_block3',...
+            'video_specific_mask_block1_interaction_video_specific_mask_block2',...       
+            'video_specific_mask_block1_interaction_video_specific_mask_block3',...       
+            'video_specific_mask_block2_interaction_video_specific_mask_block3'};       
 % 
-% for cons=1:numel(contrasts)
-%             contrast=contrasts{cons};
-% 
-% 
-%             load(fullfile(path_designmat,strcat(sel_sub,'_contrast_mat_sym')))
-%             %contrast_mat=getfield(contrast_def,contrast);
-%             contrast_mat=mcf_contrastmatdef(contrast_def,contrast);
+
+ all_roi.hip_l={'Left-Hippocampus'};
+ all_roi.hip_r={'Right-Hippocampus'};
+ all_roi.vmpfc={'ctx-lh-lateralorbitofrontal','ctx-lh-medialorbitofrontal','ctx-rh-lateralorbitofrontal','ctx-rh-medialorbitofrontal'};
+ all_roi.ifg={'ctx-rh-parstriangularis','ctx-rh-parsopercularis','ctx-rh-parsorbitalis','ctx-lh-parstriangularis','ctx-lh-parsopercularis','ctx-lh-parsorbitalis'};
+% %roi.ifg_l={'ctx-lh-parstriangularis','ctx-lh-parsopercularis','ctx-lh-parsorbitalis'};
+ all_roi.dm_pfc ={'ctx-rh-rostralmiddlefrontal','ctx-rh-caudalmiddlefrontal','ctx-lh-rostralmiddlefrontal','ctx-lh-caudalmiddlefrontal'};
+% %roi.dm_pfc_l={'ctx-lh-rostralmiddlefrontal','ctx-lh-caudalmiddlefrontal'};
+ all_roi.amy_r={'Right-Amygdala'};
+ all_roi.amy_l={'Left-Amygdala'};
+ all_roi.ventraltempocci={'ctx-lh-fusiform','ctx-lh-inferiortemporal','ctx-lh-lateraloccipital','ctx-lh-lingual','ctx-lh-middletemporal','ctx-lh-parahippocampal','ctx-lh-temporalpole','ctx-rh-fusiform','ctx-rh-inferiortemporal','ctx-rh-lateraloccipital','ctx-rh-lingual','ctx-rh-middletemporal','ctx-rh-parahippocampal','ctx-rh-temporalpole'};
+ %roi.ventraltempocci_r={'ctx-rh-fusiform','ctx-rh-inferiortemporal','ctx-rh-lateraloccipital','ctx-rh-lingual','ctx-rh-middletemporal','ctx-rh-parahippocampal','ctx-rh-temporalpole'};
+all_roi.amy={'Left-Amygdala','Right-Amygdala'};
+all_roi.hip={'Right-Hippocampus','Left-Hippocampus'};
+
+rois=fieldnames(all_roi);
+        %%%%%%%%%%%%%%
+        load('D:\matlab_tools\jet_grey.mat')
+ for r=1:numel(rois)
+        roi=rois{r};
+        
+        
+        folder_rsa=fullfile(path_out,[pow_feature,'_timeslide_',norm,'_toi',num2str(toi(1)*1000),'to',num2str(toi(2)*1000)],roi,'rsa_mat');   
+        all_subs=dir([folder_rsa,'\*.mat']);
+        all_subs={all_subs(:).name(1:end-8)};
+for cons=1:numel(contrasts)
+            contrast=contrasts{cons};
+        for sub=1:numel(all_subs)
+            sel_sub=all_subs{sub};
+            load(fullfile(path_designmat,strcat(sel_sub,'_contrast_mat_sym')))
+            load(fullfile(folder_rsa,[sel_sub,'_rsa.mat']))
+
+            %contrast_mat=getfield(contrast_def,contrast);
+            contrast_mat=mcf_contrastmatdef(contrast_def,contrast);
+            
+          % get data for contrast & rand distribution
+                        % get condition and rand contrasts
+            cfg_con.generate_rand='yes';
+            cfg_con.nrand=nrand;
+            cfg_con.contrast_mat=contrast_mat;
+            cfg_con.sortind=contrast_def.sortind_org2usedtrlinfo;
+            [rsa_cond]=mcf_rsacontrasts(cfg_con,rsa);
+            
+            rsa_ga.cond_rsa(sub,:,:,:)=rsa_cond.cond_rsa;
+            rsa_ga.rand_rsa(sub,:,:,:,:)=rsa_cond.rand_rsa;
+        end
 %         rsa_ga.time=rsa_cond.time;
 %         rsa_ga.t1=rsa_cond.t1;
 %         rsa_ga.t2=rsa_cond.t2;
@@ -176,8 +224,8 @@ rois=fieldnames(all_roi);
 %         
 %         save([path_fig,'\',contrast,'_in_',roi,'.mat'],'stats')
 %         close all
-%     end
-% end
+     end
+end
 
 
 
