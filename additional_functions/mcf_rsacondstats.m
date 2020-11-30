@@ -14,7 +14,7 @@ nrand=cfg_stats.nrand;
 
 
 
-switch rsa.dim
+switch rsa_ga.dim_cond
     case 'subj_cond_time_time'
         n_bins=numel(rsa_ga.time);
         
@@ -160,7 +160,7 @@ switch rsa.dim
         data1=data_dummy;
         data1.avg=rsa_ga.cond_rsa(:,1,:);
         data2=data_dummy;
-        data2.avg.rsa_ga.cond_rsa(:,2,:);
+        data2.avg=rsa_ga.cond_rsa(:,2,:);
         
         % define freqstats
         cfg=[];
@@ -174,7 +174,7 @@ switch rsa.dim
         cfg.correcttail      = 'prob';
         cfg.statistic ='depsamplesT'
         % for within-subjects (depsamplesT)
-        Nsub = size(data1.powspctrm,1);                                       %# of subjects?
+        Nsub = size(data1.avg,1);                                       %# of subjects?
         design(1,1:2*Nsub)  = [ones(1,Nsub) 2*ones(1,Nsub)];
         design(2,1:2*Nsub)  = [1:Nsub 1:Nsub];
         
@@ -191,10 +191,10 @@ switch rsa.dim
                     % run permutation stats (using_ft_freqstats)
                     Nsub = size(rsa_ga.rand_rsa,1);
                     data1=data_dummy;
-                    data1.powspctrm=reshape(squeeze(rsa_ga.rand_rsa(:,1,i,:)),Nsub,1,n_freq);
+                    data1.avg=reshape(squeeze(rsa_ga.rand_rsa(:,1,i,:)),Nsub,1,n_freq);
                     
                     data2=data_dummy;
-                    data2.powspctrm=reshape(squeeze(rsa_ga.rand_rsa(:,2,i,:)),Nsub,1,n_freq);
+                    data2.avg=reshape(squeeze(rsa_ga.rand_rsa(:,2,i,:)),Nsub,1,n_freq);
                     
                     cfg=[];
                     cfg.avgoverchan =  'yes';
@@ -207,7 +207,7 @@ switch rsa.dim
                     cfg.correcttail      = 'prob';
                     cfg.statistic ='depsamplesT'
                     % for within-subjects (depsamplesT)
-                    Nsub = size(data1.powspctrm,1);
+                    Nsub = size(data1.avg,1);
                     %# of subjects?
                     design=[];
                     design(1,1:2*Nsub)  = [ones(1,Nsub) 2*ones(1,Nsub)];

@@ -73,7 +73,7 @@ all_contrasts{10}.contrast= 'item_specific';
 all_contrasts{10}.roi='ventraltempocci';
 all_contrasts{10}.toi=[2 3.8];
   %%
-for con_clus=4:numel(all_contrasts)
+for con_clus=10:numel(all_contrasts)
     contrast= all_contrasts{con_clus}.contrast;
     roi= all_contrasts{con_clus}.roi;
     toi=all_contrasts{con_clus}.toi;
