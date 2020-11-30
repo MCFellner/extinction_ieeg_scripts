@@ -41,11 +41,11 @@ all_contrasts{2}.contrast= 'type1to2_vs_type2to3_mask_block1_interaction_type1to
 all_contrasts{2}.roi='amy';
 all_contrasts{2}.toi=[2 3.8];
 
-all_contrasts{3}.contrast= 'item_specific_mask_block1_interaction_item_specific_mask_block2';
+all_contrasts{3}.contrast= 'item_specific_mask_block1_interaction_item_specific_mask_block3';
 all_contrasts{3}.roi='ifg';
 all_contrasts{3}.toi=[2 3];
 
-all_contrasts{4}.contrast= 'item_specific_mask_block1_interaction_item_specific_mask_block2';
+all_contrasts{4}.contrast= 'item_specific_mask_block1_interaction_item_specific_mask_block3';
 all_contrasts{4}.roi='ifg';
 all_contrasts{4}.toi=[2 3.8];
 
@@ -73,7 +73,7 @@ all_contrasts{10}.contrast= 'item_specific';
 all_contrasts{10}.roi='ventraltempocci';
 all_contrasts{10}.toi=[2 3.8];
   %%
-for con_clus=1:numel(all_contrasts)
+for con_clus=4:numel(all_contrasts)
     contrast= all_contrasts{con_clus}.contrast;
     roi= all_contrasts{con_clus}.roi;
     toi=all_contrasts{con_clus}.toi;

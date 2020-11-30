@@ -59,7 +59,7 @@ rois=fieldnames(all_roi);
         %%%%%%%%%%%%%%
         load('D:\matlab_tools\jet_grey.mat')
         
-        folder_out=fullfile(path_out,[pow_feature,'_timeslide_',norm,'_toi',num2str(toi(1)*1000),'to',num2str(toi(2)*1000)],'rsa_mat');
+        folder_out=fullfile(path_out,[pow_feature,'_timeslide_',norm,'_toi',num2str(toi(1)*1000),'to',num2str(toi(2)*1000)],roi,'rsa_mat');
         mkdir(folder_out)
         
         % for every sub check for elecs in the roi (then run rsa/stats)
