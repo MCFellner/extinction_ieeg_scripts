@@ -73,7 +73,7 @@ all_contrasts{10}.contrast= 'item_specific';
 all_contrasts{10}.roi='ventraltempocci';
 all_contrasts{10}.toi=[2 3.8];
   %%
-for con_clus=10:numel(all_contrasts)
+for con_clus=1:numel(all_contrasts)
     contrast= all_contrasts{con_clus}.contrast;
     roi= all_contrasts{con_clus}.roi;
     toi=all_contrasts{con_clus}.toi;
@@ -354,6 +354,7 @@ for con_clus=10:numel(all_contrasts)
     
     % add block markers
     ax_def=gca;
+    hold on
     plot([24 24],ax_def.YLim,'k:')
     plot([48 48],ax_def.YLim,'k:')
     
@@ -389,8 +390,8 @@ for con_clus=10:numel(all_contrasts)
     stat= ft_timelockstatistics(cfg,data1, data2);
     
     % add stars at significant clusters
-    hold on
     if any(stat.mask)
+        hold on
         scatter(find(stat.mask),ones(size(find(stat.mask))).*ax_def.YLim(2),'*')
     end
     legend([{'wi'},{'stde'},{'bi'},{'stde'}],'Location','northeastoutside')
@@ -488,9 +489,12 @@ for con_clus=10:numel(all_contrasts)
     title('valence: trial course')
     % add block markers
     ax_def=gca;
+        hold on
+
     plot([24 24],ax_def.YLim,'k:')
     plot([48 48],ax_def.YLim,'k:')
-    
+        hold on
+
     % add cluster permutation
     data1_mat=permute(all_contrast_rsa.type1to2_vs_type2to3_x_trialcourse(:,:,1),[1,3,2]);
     data2_mat=permute(all_contrast_rsa.type1to2_vs_type2to3_x_trialcourse(:,:,2),[1,3,2]);
@@ -525,6 +529,8 @@ for con_clus=10:numel(all_contrasts)
     % add stars at significant clusters
     hold on
     if any(stat.mask)
+            hold on
+
         scatter(find(stat.mask),ones(size(find(stat.mask))).*ax_def.YLim(2),'*')
     end
     legend([{'type1to2'},{'stde'},{'type2to3'},{'stde'}],'Location','northeastoutside')
