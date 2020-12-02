@@ -72,8 +72,16 @@ all_contrasts{9}.toi=[2 3];
 all_contrasts{10}.contrast= 'item_specific';
 all_contrasts{10}.roi='ventraltempocci';
 all_contrasts{10}.toi=[2 3.8];
+
+all_contrasts{11}.contrast= 'video_specific_mask_block1';
+all_contrasts{11}.roi='ventraltempocci';
+all_contrasts{11}.toi=[0 3];
+
+
+
+
   %%
-for con_clus=1:numel(all_contrasts)
+for con_clus=11:numel(all_contrasts)
     contrast= all_contrasts{con_clus}.contrast;
     roi= all_contrasts{con_clus}.roi;
     toi=all_contrasts{con_clus}.toi;
@@ -529,8 +537,6 @@ for con_clus=1:numel(all_contrasts)
     % add stars at significant clusters
     hold on
     if any(stat.mask)
-            hold on
-
         scatter(find(stat.mask),ones(size(find(stat.mask))).*ax_def.YLim(2),'*')
     end
     legend([{'type1to2'},{'stde'},{'type2to3'},{'stde'}],'Location','northeastoutside')
