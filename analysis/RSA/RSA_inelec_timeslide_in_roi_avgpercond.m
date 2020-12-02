@@ -122,7 +122,7 @@ for con_clus=11:numel(all_contrasts)
     % item specfic contrast
     % valence contrast
     
-    contrasts={'item_specific','type1to2_vs_type2to3'};
+    contrasts={'item_specific','type1to2_vs_type2to3','video_specific'};
     mask_def={'block','halfs','trialcourse'};
     contrast_masks={    {'block1','block2','block3'},...
         {'first_half_block1','second_half_block1',...
