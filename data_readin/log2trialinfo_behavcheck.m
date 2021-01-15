@@ -6,7 +6,7 @@
 % add path with your fieldtrip toolbox
 addpath('D:\matlab_tools\fieldtrip-20190108')
 % add path with additional functions
-addpath ('D:\Extinction\iEEG\scripts\additional_functions');
+addpath ('D:\Extinction\iEEG\extinction_ieeg_scripts\additional_functions');
 ft_defaults % adds the right folders of fieldtrip
 
             
@@ -40,7 +40,7 @@ mkdir(path_out);
 % allsubs = {'p_sub01','p_sub02','p_sub03','p_sub04','p_sub05','p_sub06','p_sub07','p_sub08',...
 %           'c_sub01','c_sub02','c_sub03','c_sub05','c_sub06','c_sub07','c_sub08','c_sub09','c_sub10',...
 %           'c_sub11','c_sub12','c_sub13','c_sub14','c_sub15','c_sub16','c_sub17','c_sub18'};
-allsubs = {'c_sub20'};
+allsubs = {'c_sub19','c_sub21','c_sub22','c_sub23','c_sub24','c_sub25'};
 %allsubs = {'p_sub08'}
 for sub=1:length(allsubs)
 sel_sub=allsubs{sub};
@@ -279,8 +279,9 @@ mkdir(path_info)
 %           'c_sub11','c_sub12','c_sub13','c_sub14','c_sub15','c_sub16','c_sub17','c_sub18'};
  %allsubs = {'c_sub04','c_sub20'};
  
- allsubs = {'p_sub08'}
- 
+ %allsubs = {'p_sub08'}
+ allsubs = {'c_sub19','c_sub21','c_sub22','c_sub23','c_sub24','c_sub25'};
+
 for sub = 1:numel(allsubs)
     sel_sub=allsubs{sub};
     load(strcat(path_in,sel_sub,'_trlinfo'))
