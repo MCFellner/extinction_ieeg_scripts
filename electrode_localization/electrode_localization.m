@@ -6,167 +6,174 @@ ft_defaults
 addpath('D:\Extinction\iEEG\scripts\additional_functions')
 
 %% read in mri
-% path_data='D:\Extinction\iEEG\rawdata\extinction_ieeg\';
+path_data='D:\Extinction\iEEG\rawdata\extinction_ieeg\';
 % allsubs = {'c_sub01','c_sub02','c_sub03','c_sub04','c_sub05','c_sub06','c_sub07','c_sub08','c_sub09','c_sub10',...
 %           'c_sub11','c_sub12','c_sub13','c_sub14','c_sub15','c_sub16','c_sub17','c_sub18','c_sub20'};
-% 
-% sub=19
-% sel_sub=allsubs{sub};   
-% 
-% sel_folder=strcat(path_data,sel_sub,'\anat\');
-% cd (sel_folder)
-% mri = ft_read_mri('T1.nii'); 
-% 
-% % description from tutorial:
-%     % check the coordinate system of the mri
-%         % important left-right definition:
-%             % if left to right increases to the right: scan left-to-right
-%             % orientation
-% 
-%         %     1 Visualize the coordinate system of the MRI or CT by inputting the 
-%         %     following command: ft_determine_coordsys(mri) 
-%         %     2 Determine which of the three axes, x, y, or z, runs through or 
-%         %     along the left–right axis of the subject’s head. This axis is the 
-%         %     left–right axis for this anatomical volume. 
-%         %     3 Determine the orientation of the left–right axis. If the values on 
-%         %     the left–right axis increase to the right (indicated by a ‘+’ sign), 
-%         %     then the scan has a left-to-right orientation. If the values on the 
-%         %     left–right axis increase to the left, then the scan has a right-to-left
-%         %     orientation. 
-%         %     4 Write down the orientation of the scan’s left–right axis.
-% %%%%% our mr seem flipped (only kind of a good match in the coregistration
-% %%%%% later)
-% 
-% ft_determine_coordsys(mri);
-% 
-% % align mri to acpc (for freesurfer): remember orientation: L= l+
-% display('unflipped version: mark here right according to the orientation marked before')
-% cfg           = [];
-% cfg.method    = 'interactive';
-% cfg.coordsys  = 'acpc';
-% mri_acpc = ft_volumerealign(cfg, mri);
-% 
-% % here: mark r on the "wrong" side
-% display('flipped version: mark here right on the other side compared to before')
-% cfg           = [];
-% cfg.method    = 'interactive';
-% cfg.coordsys  = 'acpc';
-% mri_acpc_flipped = ft_volumerealign(cfg, mri)
-% 
-% % for some reason this mri has only negative values, shift values to
-% % positive ones
-% % check for negative values in data
-% 
-% min_anatomy=min(min(min(mri_acpc.anatomy)));
-% if min_anatomy<0
-%     mri_acpc.anatomy=mri_acpc.anatomy+abs(min_anatomy);
-%     mri_acpc_flipped.anatomy=mri_acpc_flipped.anatomy+abs(min_anatomy);
-% end
-% 
-% % write it to file
-% cfg           = [];
-% cfg.filename  = [sel_sub '_MR_acpc'];
-% cfg.filetype  = 'nifti';
-% cfg.parameter = 'anatomy'
-% ft_volumewrite(cfg, mri_acpc);
-% 
-% cfg           = [];
-% cfg.filename  = [sel_sub '_MR_acpc_flipped'];
-% cfg.filetype  = 'nifti';
-% cfg.parameter = 'anatomy'
-% ft_volumewrite(cfg, mri_acpc_flipped);
-% 
-% close all 
-% clear all
-% 
-% %% 
-% path_data='D:\Extinction\iEEG\rawdata\extinction_ieeg\';
+allsubs = {'c_sub19','c_sub21','c_sub22','c_sub23','c_sub24','c_sub25','c_sub26','c_sub29'};
+
+for sub=1:numel(allsubs)
+
+sel_sub=allsubs{sub};   
+
+sel_folder=strcat(path_data,sel_sub,'\anat\');
+cd (sel_folder)
+mri = ft_read_mri('T1.nii'); 
+
+% description from tutorial:
+    % check the coordinate system of the mri
+        % important left-right definition:
+            % if left to right increases to the right: scan left-to-right
+            % orientation
+
+        %     1 Visualize the coordinate system of the MRI or CT by inputting the 
+        %     following command: ft_determine_coordsys(mri) 
+        %     2 Determine which of the three axes, x, y, or z, runs through or 
+        %     along the left–right axis of the subject’s head. This axis is the 
+        %     left–right axis for this anatomical volume. 
+        %     3 Determine the orientation of the left–right axis. If the values on 
+        %     the left–right axis increase to the right (indicated by a ‘+’ sign), 
+        %     then the scan has a left-to-right orientation. If the values on the 
+        %     left–right axis increase to the left, then the scan has a right-to-left
+        %     orientation. 
+        %     4 Write down the orientation of the scan’s left–right axis.
+%%%%% our mr seem flipped (only kind of a good match in the coregistration
+%%%%% later)
+
+ft_determine_coordsys(mri);
+
+% align mri to acpc (for freesurfer): remember orientation: L= l+
+display('unflipped version: mark here right according to the orientation marked before')
+cfg           = [];
+cfg.method    = 'interactive';
+cfg.coordsys  = 'acpc';
+mri_acpc = ft_volumerealign(cfg, mri);
+
+% here: mark r on the "wrong" side
+display('flipped version: mark here right on the other side compared to before')
+cfg           = [];
+cfg.method    = 'interactive';
+cfg.coordsys  = 'acpc';
+mri_acpc_flipped = ft_volumerealign(cfg, mri)
+
+% for some reason this mri has only negative values, shift values to
+% positive ones
+% check for negative values in data
+
+min_anatomy=min(min(min(mri_acpc.anatomy)));
+if min_anatomy<0
+    mri_acpc.anatomy=mri_acpc.anatomy+abs(min_anatomy);
+    mri_acpc_flipped.anatomy=mri_acpc_flipped.anatomy+abs(min_anatomy);
+end
+
+% write it to file
+cfg           = [];
+cfg.filename  = [sel_sub '_MR_acpc'];
+cfg.filetype  = 'nifti';
+cfg.parameter = 'anatomy'
+ft_volumewrite(cfg, mri_acpc);
+
+cfg           = [];
+cfg.filename  = [sel_sub '_MR_acpc_flipped'];
+cfg.filetype  = 'nifti';
+cfg.parameter = 'anatomy'
+ft_volumewrite(cfg, mri_acpc_flipped);
+
+close all 
+keep allsubs sub path_data
+end
+%% 
+path_data='D:\Extinction\iEEG\rawdata\extinction_ieeg\';
 % allsubs = {'c_sub01','c_sub02','c_sub03','c_sub04','c_sub05','c_sub06','c_sub07','c_sub08','c_sub09','c_sub10',...
 %           'c_sub11','c_sub12','c_sub13','c_sub14','c_sub15','c_sub16','c_sub17','c_sub18','c_sub20'};
-% 
-% 
-% sub=12
-% sel_sub=allsubs{sub};   
-% 
-% sel_folder=strcat(path_data,sel_sub,'\anat\');
-% cd (sel_folder)
-% 
-% % import ct
-% ct = ft_read_mri('CT2.hdr'); % we used the dcm series
-% %
-% ft_determine_coordsys(ct); % here check with ppt in info folder
-% 
-% % realign to ctf (nasion, lpa, rpa and interhemispheric location)
-% cfg           = [];
-% cfg.method    = 'interactive';
-% %cfg.coordsys  = 'ctf';
-% cfg.coordsys  = 'acpc';
-% ct_ctf = ft_volumerealign(cfg, ct);
-% ct_acpc=ct_ctf;
-% % same coordinates as the mri
-% %ct_acpc = ft_convert_coordsys(ct_ctf, 'acpc');
-% 
-% % cfg = [];
-% % cfg.anaparameter = 'anatomy';
-% % cfg.funparameter = 'anatomy';
-% % cfg.location = [0 0 60];
-% % ft_sourceplot(cfg, ct_acpc)
-% 
-% %import  processed mri
-% filename=strcat(sel_sub,'_MR_acpc.nii') % change here to nii from freesurfer
-% fsmri_acpc = ft_read_mri(filename); 
-% fsmri_acpc.coordsys = 'acpc';
-% 
-% % fusion of ct and mri: unflipped
-% cfg             = [];
-% cfg.method      = 'spm';
-% cfg.spmversion  = 'spm12';
-% cfg.coordsys    = 'acpc';
-% cfg.viewresult  = 'yes';
-% cfg.parameter='anatomy';
-% ct_acpc_f = ft_volumerealign(cfg,ct_acpc,fsmri_acpc);
-% 
-% % verify fusion!
-% % for verifying fusion: also use mricron (better scrollable)
-% % if fusion sucks: redo all steps, think about whether there might be a
-% % l/r flip in the data
-% 
-% % write fused mri to file
-% filename=strcat(sel_sub,'_ct_acpc_f') 
-% cfg           = [];
-% cfg.filename  = filename;
-% cfg.filetype  = 'nifti';
-% cfg.parameter = 'anatomy';
-% ft_volumewrite(cfg, ct_acpc_f);
-% 
-% % fusion ct and mri: flipped
-% filename=strcat(sel_sub,'_MR_acpc_flipped.nii') % change here to nii from freesurfer
-% fsmri_acpc_flipped = ft_read_mri(filename); 
-% fsmri_acpc_flipped.coordsys = 'acpc';
-% 
-% cfg             = [];
-% cfg.method      = 'spm';
-% cfg.spmversion  = 'spm12';
-% cfg.coordsys    = 'acpc';
-% cfg.viewresult  = 'yes';
-% cfg.parameter='anatomy';
-% ct_acpc_f = ft_volumerealign(cfg,ct_acpc,fsmri_acpc_flipped);
-% 
-% % write fused mri to file
-% filename=strcat(sel_sub,'_ct_acpc_f_toflippedMR') % change here to nii from freesurfer
-% cfg           = [];
-% cfg.filename  = filename;
-% cfg.filetype  = 'nifti';
-% cfg.parameter = 'anatomy';
-% ft_volumewrite(cfg, ct_acpc_f);
-% 
-% %%%%%%%%%%%% % verify fusion!
-% % for verifying fusion:  use mricron (better scrollable)
-% % decide whether mr flipped or unflipped
-% 
-% %%%%%%%%%%%%%%%
-% 
-% %% define correct T1: flipped or unflipped and move to freesurfer exchange folder
+allsubs = {'c_sub19','c_sub21','c_sub22','c_sub23','c_sub24','c_sub25','c_sub26','c_sub29'};
+
+
+for sub=5:numel(allsubs)
+sel_sub=allsubs{sub}   
+
+sel_folder=strcat(path_data,sel_sub,'\anat\');
+cd (sel_folder)
+
+% import ct
+file_ct=dir('CT2.*');
+ct = ft_read_mri(file_ct.name); % we used the dcm series
+%
+%ft_determine_coordsys(ct); % here check with ppt in info folder
+
+% realign to ctf (nasion, lpa, rpa and interhemispheric location)
+cfg           = [];
+cfg.method    = 'interactive';
+%cfg.coordsys  = 'ctf';
+cfg.coordsys  = 'acpc';
+ct_ctf = ft_volumerealign(cfg, ct);
+ct_acpc=ct_ctf;
+% same coordinates as the mri
+%ct_acpc = ft_convert_coordsys(ct_ctf, 'acpc');
+
+% cfg = [];
+% cfg.anaparameter = 'anatomy';
+% cfg.funparameter = 'anatomy';
+% cfg.location = [0 0 60];
+% ft_sourceplot(cfg, ct_acpc)
+
+%import  processed mri
+filename=strcat(sel_sub,'_MR_acpc.nii') % change here to nii from freesurfer
+fsmri_acpc = ft_read_mri(filename); 
+fsmri_acpc.coordsys = 'acpc';
+
+% fusion of ct and mri: unflipped
+cfg             = [];
+cfg.method      = 'spm';
+cfg.spmversion  = 'spm12';
+cfg.coordsys    = 'acpc';
+cfg.viewresult  = 'yes';
+cfg.parameter='anatomy';
+ct_acpc_f = ft_volumerealign(cfg,ct_acpc,fsmri_acpc);
+
+% verify fusion!
+% for verifying fusion: also use mricron (better scrollable)
+% if fusion sucks: redo all steps, think about whether there might be a
+% l/r flip in the data
+
+% write fused mri to file
+filename=strcat(sel_sub,'_ct_acpc_f') 
+cfg           = [];
+cfg.filename  = filename;
+cfg.filetype  = 'nifti';
+cfg.parameter = 'anatomy';
+ft_volumewrite(cfg, ct_acpc_f);
+
+% fusion ct and mri: flipped
+filename=strcat(sel_sub,'_MR_acpc_flipped.nii') % change here to nii from freesurfer
+fsmri_acpc_flipped = ft_read_mri(filename); 
+fsmri_acpc_flipped.coordsys = 'acpc';
+
+cfg             = [];
+cfg.method      = 'spm';
+cfg.spmversion  = 'spm12';
+cfg.coordsys    = 'acpc';
+cfg.viewresult  = 'yes';
+cfg.parameter='anatomy';
+ct_acpc_f = ft_volumerealign(cfg,ct_acpc,fsmri_acpc_flipped);
+
+% write fused mri to file
+filename=strcat(sel_sub,'_ct_acpc_f_toflippedMR') % change here to nii from freesurfer
+cfg           = [];
+cfg.filename  = filename;
+cfg.filetype  = 'nifti';
+cfg.parameter = 'anatomy';
+ft_volumewrite(cfg, ct_acpc_f);
+close all 
+keep allsubs sub path_data
+end
+
+%%%%%%%%%%%% % verify fusion!
+% for verifying fusion:  use mricron (better scrollable)
+% decide whether mr flipped or unflipped
+
+%%%%%%%%%%%%%%%
+
+%% define correct T1: flipped or unflipped and move to freesurfer exchange folder
 % path_data='D:\Extinction\iEEG\rawdata\extinction_ieeg\';
 % path_info='D:\Extinction\iEEG\data\preproc\ieeg\datainfo\';
 % allsubs = {'c_sub01','c_sub02','c_sub03','c_sub04','c_sub05','c_sub06','c_sub07','c_sub08','c_sub09','c_sub10',...
