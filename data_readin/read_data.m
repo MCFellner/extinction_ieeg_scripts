@@ -376,7 +376,7 @@ allsubs = {'c_sub19','c_sub21','c_sub22','c_sub23','c_sub24','c_sub25','c_sub26'
 % data=ft_preprocessing(cfg)
 
 
-for sub=8%:length(allsubs)
+for sub=4%:length(allsubs)
     sel_sub=allsubs{sub};
     
     load(strcat(path_trialinfo,sel_sub,'_trlinfo.mat'))
@@ -486,7 +486,7 @@ for sub=8%:length(allsubs)
     elseif strcmp(sel_sub,'c_sub22')
         clean_chan=data_all.label(setdiff(1:numel(data_all.label),[20, 38:41,44:45,70:76]));
     elseif strcmp(sel_sub,'c_sub23')
-        clean_chan=data_all.label(setdiff(1:numel(data_all.label),[15:22,25:37,38:41,44:45,112:160]));
+        clean_chan=data_all.label(setdiff(1:numel(data_all.label),[15:22,25:35,38:41,44:45,112:160]));
     elseif strcmp(sel_sub,'c_sub24')
         clean_chan=data_all.label(setdiff(1:numel(data_all.label),[20,44:45,146:152]));
     elseif strcmp(sel_sub,'c_sub25')

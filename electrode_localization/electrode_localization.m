@@ -174,35 +174,37 @@ end
 %%%%%%%%%%%%%%%
 
 %% define correct T1: flipped or unflipped and move to freesurfer exchange folder
-% path_data='D:\Extinction\iEEG\rawdata\extinction_ieeg\';
-% path_info='D:\Extinction\iEEG\data\preproc\ieeg\datainfo\';
+path_data='D:\Extinction\iEEG\rawdata\extinction_ieeg\';
+path_info='D:\Extinction\iEEG\data\preproc\ieeg\datainfo\';
 % allsubs = {'c_sub01','c_sub02','c_sub03','c_sub04','c_sub05','c_sub06','c_sub07','c_sub08','c_sub09','c_sub10',...
 %           'c_sub11','c_sub12','c_sub13','c_sub14','c_sub15','c_sub16','c_sub17','c_sub18','c_sub20'};
-% 
-% for i=7:numel(allsubs)
-% sel_sub=allsubs{i}    
-% load(strcat(path_info,sel_sub,'_datainfo.mat'))
-% 
-% flip_def=input('Is original T1 flipped or not? write ''flipped'' or ''no_flip''  ');
-% datainfo.anat.mri.filename='T1.nii';
-% datainfo.anat.mri.flipped=flip_def;
-% save(strcat(path_info,sel_sub,'_datainfo.mat'),'datainfo')
-% 
-% fs_path=strcat('I:\Extinction\iEEG\data\eeg\freesurfer_anat\mri\',sel_sub,'\');
-% mkdir(fs_path)
-% if strcmp(flip_def,'flipped')
-% filename=strcat(path_data,sel_sub,'\anat\',sel_sub,'_MR_acpc_flipped.nii');
-% elseif strcmp(flip_def,'no_flip')
-% filename=strcat(path_data,sel_sub,'\anat\',sel_sub,'_MR_acpc.nii');
-% else
-%     error('flip not defined')
-% end
-% 
-% file_out=strcat(fs_path,sel_sub,'_MR_acpc.nii');
-% copyfile(filename,file_out)
-% end
-%      
-%  %%
+allsubs = {'c_sub19','c_sub21','c_sub22','c_sub23','c_sub24','c_sub25','c_sub26','c_sub29'};
+
+for i=1:numel(allsubs)
+sel_sub=allsubs{i}    
+load(strcat(path_info,sel_sub,'_datainfo.mat'))
+
+flip_def=input('Is original T1 flipped or not? write ''flipped'' or ''no_flip''  ');
+datainfo.anat.mri.filename='T1.nii';
+datainfo.anat.mri.flipped=flip_def;
+save(strcat(path_info,sel_sub,'_datainfo.mat'),'datainfo')
+
+%fs_path=strcat('I:\Extinction\iEEG\data\eeg\freesurfer_anat\mri\',sel_sub,'\');
+fs_path=strcat('D:\Extinction\iEEG\data\freesurfer_anat\mri\',sel_sub,'\');
+mkdir(fs_path)
+if strcmp(flip_def,'flipped')
+filename=strcat(path_data,sel_sub,'\anat\',sel_sub,'_MR_acpc_flipped.nii');
+elseif strcmp(flip_def,'no_flip')
+filename=strcat(path_data,sel_sub,'\anat\',sel_sub,'_MR_acpc.nii');
+else
+    error('flip not defined')
+end
+
+file_out=strcat(fs_path,sel_sub,'_MR_acpc.nii');
+copyfile(filename,file_out)
+end
+      
+%%
 % % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%start linux virtual box 
 % % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % % % cortical surface extraction: freesurfer
@@ -259,135 +261,182 @@ end
 % % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% linux/virtual box end
 % % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % % 
-% %% move files back to folders
+%% move files back to folders
 % path_data='D:\Extinction\iEEG\data\freesurfer_anat\';
 % fs_path=strcat('I:\Extinction\iEEG\data\eeg\freesurfer_anat\');
 % 
 % copyfile(fs_path,path_data)
 % 
-%% coregister freesurfer mr to ct
-% path_data='D:\Extinction\iEEG\';
-% 
-% allsubs = {'c_sub01','c_sub02','c_sub03','c_sub04','c_sub05','c_sub06','c_sub07','c_sub08','c_sub09','c_sub10',...
-%           'c_sub11','c_sub12','c_sub13','c_sub14','c_sub15','c_sub16','c_sub17','c_sub18','c_sub20'};
-% 
-% for i=19%:6%numel(allsubs)
-% sel_sub=allsubs{i};    
-% path_mr=strcat(path_data,'data\freesurfer_anat\output\',sel_sub,'\fieldtrip\',sel_sub);
-% path_ct=strcat(path_data,'rawdata\extinction_ieeg\',sel_sub,'\anat\');
-% 
-% cd (path_ct)
-% 
-% % import ct
-% if strcmp(sel_sub,'c_sub20')
-% ct = ft_read_mri('CT2.nii'); 
-% else
-% ct = ft_read_mri('CT2.hdr'); 
-% end
-% %
-% ft_determine_coordsys(ct); % here check with ppt in info folder, are electrodes in the right hemisphere? (pos=right)
-% 
-% % realign to ctf (nasion, lpa, rpa and interhemispheric location)
-% cfg           = [];
-% cfg.method    = 'interactive';
-% %cfg.coordsys  = 'ctf';
-% %ct_ctf = ft_volumerealign(cfg, ct);
-% cfg.coordsys='acpc';
-% ct_acpc=ft_volumerealign(cfg, ct);
-% 
-% 
-% % % same coordinates as the mri
-% % ct_acpc = ft_convert_coordsys(ct_ctf, 'acpc');
-% % 
-% % % 
-% % cfg = [];
-% % cfg.anaparameter = 'anatomy';
-% % cfg.funparameter = 'anatomy';
-% % cfg.location = [0 0 0];
-% % ft_sourceplot(cfg, ct_acpc)
-% 
-% % cfg = [];
-% % cfg.anaparameter = 'anatomy';
-% % cfg.funparameter = 'anatomy';
-% % %cfg.location = [0 0 60];
-% % ft_sourceplot(cfg, fsmri_acpc)
-% 
-% 
-% %import  processed mri
-% cd(path_mr)
-% fsmri_acpc = ft_read_mri('T1_fs.nii'); 
-% fsmri_acpc.coordsys = 'acpc';
-% 
-% % fusion of ct and mri: unflipped
-% cfg             = [];
-% cfg.method      = 'spm';
-% cfg.spmversion  = 'spm12';
-% cfg.coordsys    = 'acpc';
-% cfg.viewresult  = 'yes';
-% cfg.parameter='anatomy';
-% ct_acpc_f = ft_volumerealign(cfg,ct_acpc,fsmri_acpc);
-% 
-% % write fused mri to file
-% filename=strcat(sel_sub,'_ct_acpc_f') % change here to nii from freesurfer
-% cfg           = [];
-% cfg.filename  = filename;
-% cfg.filetype  = 'nifti';
-% cfg.parameter = 'anatomy';
-% ft_volumewrite(cfg, ct_acpc_f);
-% end
 
-% %% write electrodeinfo files; check names and numbers
-% 
-% path_data='D:\Extinction\iEEG\';
-% path_info='D:\Extinction\iEEG\data\preproc\ieeg\datainfo\';
+%for new files
+fs_path='D:\Extinction\iEEG\rawdata\China\data_bids_forfmriprep\derivatives\freesurfer'
+path_data='D:\Extinction\iEEG\data\freesurfer_anat\output';
+allsubs = {'c_sub19','c_sub21','c_sub22','c_sub23','c_sub24','c_sub25','c_sub26','c_sub29'};
+bidssubs = {'sub-c19','sub-c21','sub-c22','sub-c23','sub-c24','sub-c25','sub-c26','sub-c29'};
+
+for sub=2:numel(allsubs)
+ sel_bids=fullfile(fs_path,bidssubs{sub});
+ sel_out=fullfile(path_data,allsubs{sub},'freesurfer');
+ mkdir(sel_out)
+ copyfile(sel_bids,sel_out)   
+end
+
+%% export fs data to windows friendly files (for new bids data)
+path_data='D:\Extinction\iEEG\data\freesurfer_anat\output';
+allsubs = {'c_sub19','c_sub21','c_sub22','c_sub23','c_sub24','c_sub25','c_sub26','c_sub29'};
+
+
+for sub=1:numel(allsubs)
+sel_sub=allsubs{sub};
+
+path_in=fullfile(path_data,sel_sub,'freesurfer','mri');
+path_out=fullfile(path_data,sel_sub,'fieldtrip',sel_sub);
+
+mkdir(path_out)
+cd(path_in)
+
+% save atlas as matlab file for readability in windows
+atlasDK=ft_read_atlas('aparc+aseg.mgz');
+save(fullfile(path_out,'atlasDK.mat'),'atlasDK')
+clear atlasDK
+atlasDKT40=ft_read_atlas('aparc.DKTatlas+aseg.mgz');
+save(fullfile(path_out,'atlasDKT40.mat'),'atlasDKT40')
+clear atlasDKT40
+atlasDest=ft_read_atlas('aparc.a2009s+aseg.mgz');
+save(fullfile(path_out,'atlasDest.mat'),'atlasDest')
+clear atlasDest
+%save fs mri (slightly changes dimensions...)
+mri=ft_read_mri('T1.mgz')
+cfg=[];
+cfg.parameter     = 'anatomy';
+cfg.filename      = fullfile(path_out,'T1_fs');
+cfg.filetype      = 'nifti'
+ft_volumewrite(cfg,mri)
+clear mri
+end
+
+%% coregister freesurfer mr to ct
+path_data='D:\Extinction\iEEG\';
+
 % allsubs = {'c_sub01','c_sub02','c_sub03','c_sub04','c_sub05','c_sub06','c_sub07','c_sub08','c_sub09','c_sub10',...
 %           'c_sub11','c_sub12','c_sub13','c_sub14','c_sub15','c_sub16','c_sub17','c_sub18','c_sub20'};
+allsubs = {'c_sub19','c_sub21','c_sub22','c_sub23','c_sub24','c_sub25','c_sub26','c_sub29'};
+
+for i=1:numel(allsubs)
+sel_sub=allsubs{i};    
+path_mr=strcat(path_data,'data\freesurfer_anat\output\',sel_sub,'\fieldtrip\',sel_sub);
+path_ct=strcat(path_data,'rawdata\extinction_ieeg\',sel_sub,'\anat\');
+
+cd (path_ct)
+
+%import ct
+file_ct=dir('CT2.*');
+ct = ft_read_mri(file_ct.name);
+%
+%ft_determine_coordsys(ct); % here check with ppt in info folder, are electrodes in the right hemisphere? (pos=right)
+
+% realign to ctf (nasion, lpa, rpa and interhemispheric location)
+cfg           = [];
+cfg.method    = 'interactive';
+%cfg.coordsys  = 'ctf';
+%ct_ctf = ft_volumerealign(cfg, ct);
+cfg.coordsys='acpc';
+ct_acpc=ft_volumerealign(cfg, ct);
+
+
+% % same coordinates as the mri
+% ct_acpc = ft_convert_coordsys(ct_ctf, 'acpc');
 % 
-% for i=1:numel(allsubs)
-% sel_sub=allsubs{i};  
-% % electrode names from ieeg files
-%  eeg_file=strcat(path_data,'data\preproc\ieeg\readin\', sel_sub,'_data.mat');
-% load(eeg_file)
-%  info_file=strcat(path_info,sel_sub,'_datainfo');
-% load(info_file)
-% 
-% elec_info.labels_orderindata=data.label;
-% % resort labels for easier labeling
-% % define electrodes
-% ekg_count=0;
-% for i=1:numel(data.label)
-%     sel_lab=data.label{i};
-%     if strncmp(sel_lab, 'EKG',3)
-%     channel_type{i}='EKG';
-%     electrode{i,1}='EKG';
-%     ekg_count=ekg_count+1;
-%     electrode{i,2}=ekg_count;
-%     else
-%     channel_type{i}='iEEG';
-%     for j=1:numel(sel_lab)
-%     num_ind(j)=str2double(sel_lab(j));
-%     end
-%     electrode{i,1}=sel_lab(isnan(num_ind));
-%     electrode{i,2}=str2double(sel_lab(~isnan(num_ind)));
-%     clear num_ind
-%     end
-% end
-% 
-% cell_ieeg=sortrows(electrode(strcmp(channel_type,'iEEG'),:));
-% 
-% for i=1:size(cell_ieeg,1)
-%    sorted_ieeg{i,1}=strcat(cell_ieeg{i,1},num2str(cell_ieeg{i,2}));
-% end
-% elec_info.orderindata.label=data.label;
-% elec_info.orderindata.channel_type=channel_type;
-% elec_info.reordered.cell_ieeg=cell_ieeg;
-% elec_info.reordered.sorted_ieeg=sorted_ieeg;
-% 
-% datainfo.elec_info=elec_info;
-% save(info_file,'datainfo')
-% keep path_data path_info allsubs
-% 
-% end
+% % 
+% cfg = [];
+% cfg.anaparameter = 'anatomy';
+% cfg.funparameter = 'anatomy';
+% cfg.location = [0 0 0];
+% ft_sourceplot(cfg, ct_acpc)
+
+% cfg = [];
+% cfg.anaparameter = 'anatomy';
+% cfg.funparameter = 'anatomy';
+% %cfg.location = [0 0 60];
+% ft_sourceplot(cfg, fsmri_acpc)
+
+
+%import  processed mri
+cd(path_mr)
+fsmri_acpc = ft_read_mri('T1_fs.nii'); 
+fsmri_acpc.coordsys = 'acpc';
+
+% fusion of ct and mri: unflipped
+cfg             = [];
+cfg.method      = 'spm';
+cfg.spmversion  = 'spm12';
+cfg.coordsys    = 'acpc';
+cfg.viewresult  = 'yes';
+cfg.parameter='anatomy';
+ct_acpc_f = ft_volumerealign(cfg,ct_acpc,fsmri_acpc);
+
+% write fused mri to file
+filename=strcat(sel_sub,'_ct_acpc_f') % change here to nii from freesurfer
+cfg           = [];
+cfg.filename  = filename;
+cfg.filetype  = 'nifti';
+cfg.parameter = 'anatomy';
+ft_volumewrite(cfg, ct_acpc_f);
+end
+
+%% write electrodeinfo files; check names and numbers
+
+path_data='D:\Extinction\iEEG\';
+path_info='D:\Extinction\iEEG\data\preproc\ieeg\datainfo\';
+% allsubs = {'c_sub01','c_sub02','c_sub03','c_sub04','c_sub05','c_sub06','c_sub07','c_sub08','c_sub09','c_sub10',...
+%           'c_sub11','c_sub12','c_sub13','c_sub14','c_sub15','c_sub16','c_sub17','c_sub18','c_sub20'};
+allsubs = {'c_sub19','c_sub21','c_sub22','c_sub23','c_sub24','c_sub25','c_sub26','c_sub29'};
+
+for i=4%:numel(allsubs)
+sel_sub=allsubs{i};  
+% electrode names from ieeg files
+ eeg_file=strcat(path_data,'data\preproc\ieeg\readin\', sel_sub,'_data.mat');
+load(eeg_file)
+ info_file=strcat(path_info,sel_sub,'_datainfo');
+load(info_file)
+
+elec_info.labels_orderindata=data.label;
+% resort labels for easier labeling
+% define electrodes
+ekg_count=0;
+for i=1:numel(data.label)
+    sel_lab=data.label{i};
+    if strncmp(sel_lab, 'EKG',3)
+    channel_type{i}='EKG';
+    electrode{i,1}='EKG';
+    ekg_count=ekg_count+1;
+    electrode{i,2}=ekg_count;
+    else
+    channel_type{i}='iEEG';
+    for j=1:numel(sel_lab)
+    num_ind(j)=str2double(sel_lab(j));
+    end
+    electrode{i,1}=sel_lab(isnan(num_ind));
+    electrode{i,2}=str2double(sel_lab(~isnan(num_ind)));
+    clear num_ind
+    end
+end
+
+cell_ieeg=sortrows(electrode(strcmp(channel_type,'iEEG'),:));
+
+for i=1:size(cell_ieeg,1)
+   sorted_ieeg{i,1}=strcat(cell_ieeg{i,1},num2str(cell_ieeg{i,2}));
+end
+elec_info.orderindata.label=data.label;
+elec_info.orderindata.channel_type=channel_type;
+elec_info.reordered.cell_ieeg=cell_ieeg;
+elec_info.reordered.sorted_ieeg=sorted_ieeg;
+
+datainfo.elec_info=elec_info;
+save(info_file,'datainfo')
+keep path_data path_info allsubs
+
+end
 % %% copy relevant files to Q (dataexchange)
 % 
 %% datainfo, ct, mr
@@ -420,46 +469,47 @@ end
 
 
 %% mark electrode in coregistered ct files
-% 
-% path_data='D:\Extinction\iEEG\';
-% path_info='D:\Extinction\iEEG\data\preproc\ieeg\datainfo\';
-% 
+
+path_data='D:\Extinction\iEEG\';
+path_info='D:\Extinction\iEEG\data\preproc\ieeg\datainfo\';
+
 % allsubs = {'c_sub01','c_sub02','c_sub03','c_sub04','c_sub05','c_sub06','c_sub07','c_sub08','c_sub09','c_sub10',...
 %           'c_sub11','c_sub12','c_sub13','c_sub14','c_sub15','c_sub16','c_sub17','c_sub18','c_sub20'};
-% 
-% for i=19%:numel(allsubs)
-% sel_sub=allsubs{i};  
-% 
-% % electrodeinfo
-% info_file=strcat(path_info,sel_sub,'_datainfo');
-% load(info_file)
-% 
-% %load coregistered ct &mr
-% path_mr=strcat(path_data,'data\freesurfer_anat\output\',sel_sub,'\fieldtrip\',sel_sub);
-% cd(path_mr)
-% ct_file=strcat(sel_sub,'_ct_acpc_f.nii');
-% ct = ft_read_mri(ct_file);
-% mr_file=strcat('T1_fs.nii');
-% mr = ft_read_mri(mr_file);
-% ct.coordsys='acpc';
-% mr.coordsys='acpc';
-% 
-% cfg         = [];
-% cfg.channel = datainfo.elec_info.reordered.sorted_ieeg;
-% if isfield(datainfo.elec_info,'elec_ct_mr')
-% cfg.elec           =datainfo.elec_info.elec_ct_mr;
-% end
-% elec_ct_mr = ft_electrodeplacement(cfg, ct, mr);
-% datainfo.elec_info.elec_ct_mr=elec_ct_mr;
-% save(info_file,'datainfo')
-% keep path_data path_info allsubs
-% close all
-% delete(gcf)
-% end
-% 
-% % 
+allsubs = {'c_sub19','c_sub21','c_sub22','c_sub23','c_sub24','c_sub25','c_sub26','c_sub29'};
+
+i=8%:numel(allsubs)
+sel_sub=allsubs{i};  
+
+% electrodeinfo
+info_file=strcat(path_info,sel_sub,'_datainfo');
+load(info_file)
+
+%load coregistered ct &mr
+path_mr=strcat(path_data,'data\freesurfer_anat\output\',sel_sub,'\fieldtrip\',sel_sub);
+cd(path_mr)
+ct_file=strcat(sel_sub,'_ct_acpc_f.nii');
+ct = ft_read_mri(ct_file);
+mr_file=strcat('T1_fs.nii');
+mr = ft_read_mri(mr_file);
+ct.coordsys='acpc';
+mr.coordsys='acpc';
+
+cfg         = [];
+cfg.channel = datainfo.elec_info.reordered.sorted_ieeg;
+if isfield(datainfo.elec_info,'elec_ct_mr')
+cfg.elec           =datainfo.elec_info.elec_ct_mr;
+end
+elec_ct_mr = ft_electrodeplacement(cfg, ct, mr);
+datainfo.elec_info.elec_ct_mr=elec_ct_mr;
+save(info_file,'datainfo')
+keep path_data path_info allsubs
+close all
+delete(gcf)
+
 
 % 
+
+
 
 %% get electrode information for paris data & move necessary files in localization folder
 % path_data='D:\Extinction\iEEG\';

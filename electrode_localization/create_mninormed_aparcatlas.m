@@ -77,5 +77,5 @@ standard_atlasDK = ft_read_mri(filename, 'dataformat','freesurfer_mgz')
 filename_out='D:\Extinction\iEEG\rawdata\China\data_bids_forfmriprep\derivatives\freesurfer\fsaverage\mri\test.nii'
 ft_write_mri(filename_out,standard_atlasDK,'dataformat', 'nifti')
 %%%% missing here: norm fs mri us transform on atlas for aparc in mni space
-
+% maybe coregister enough?
 atlasDK=ft_read_atlas(filename, 'dataformat','freesurfer_mgz')
