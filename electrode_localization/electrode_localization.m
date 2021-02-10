@@ -694,212 +694,214 @@ delete(gcf)
 
  
 %% normalized mrs for normalization parameters
-% path_data='D:\Extinction\iEEG\';
-% path_info='D:\Extinction\iEEG\data\preproc\ieeg\datainfo\';
-% 
+path_data='D:\Extinction\iEEG\';
+path_info='D:\Extinction\iEEG\data\preproc\ieeg\datainfo\';
+
 % allsubs = {'c_sub01','c_sub02','c_sub03','c_sub04','c_sub05','c_sub06','c_sub07','c_sub08','c_sub09','c_sub10',...
 %           'c_sub11','c_sub12','c_sub13','c_sub14','c_sub15','c_sub16','c_sub17','c_sub18','c_sub20'};
 % 
+allsubs = {'c_sub19','c_sub21','c_sub22','c_sub23','c_sub24','c_sub25','c_sub26','c_sub29'};
 
-%       
-% for i=12%:numel(allsubs)
-% sel_sub=allsubs{i};  
-% 
-% path_anat=strcat(path_data,'data\freesurfer_anat\output\',sel_sub,'\fieldtrip\',sel_sub,'\');
-% path_fs=strcat(path_data,'\data\freesurfer_anat\output\',sel_sub,'\freesurfer\mri\');
-% 
-% cd(path_anat)
-%  mr_file=strcat('T1_fs.nii');
-%  mr = ft_read_mri(mr_file);
-% mr.coordsys='acpc';
-% 
-% % % volume based normalization (to get mni coordinates)
-% cfg            = [];
-% cfg.nonlinear  = 'yes';
-% cfg.spmversion = 'spm12';
-% cfg.spmmethod  = 'new';
-% mr_mni = ft_volumenormalise(cfg, mr);
-% 
-% cfg=[];
-%  cfg.parameter     = 'anatomy';
-%  cfg.filename      = 'T1_fs_normed';
-%  cfg.filetype      =  'nifti';
-% ft_volumewrite(cfg,mr_mni) % save normed mr to check normalization
-% 
-% save(strcat(sel_sub,'_norm_mri.mat'),'mr_mni')
-% end
+      
+for i=1:numel(allsubs)
+sel_sub=allsubs{i};  
+
+path_anat=strcat(path_data,'data\freesurfer_anat\output\',sel_sub,'\fieldtrip\',sel_sub,'\');
+path_fs=strcat(path_data,'\data\freesurfer_anat\output\',sel_sub,'\freesurfer\mri\');
+
+cd(path_anat)
+ mr_file=strcat('T1_fs.nii');
+ mr = ft_read_mri(mr_file);
+mr.coordsys='acpc';
+
+% % volume based normalization (to get mni coordinates)
+cfg            = [];
+cfg.nonlinear  = 'yes';
+cfg.spmversion = 'spm12';
+cfg.spmmethod  = 'new';
+mr_mni = ft_volumenormalise(cfg, mr);
+
+cfg=[];
+ cfg.parameter     = 'anatomy';
+ cfg.filename      = 'T1_fs_normed';
+ cfg.filetype      =  'nifti';
+ft_volumewrite(cfg,mr_mni) % save normed mr to check normalization
+
+save(strcat(sel_sub,'_norm_mri.mat'),'mr_mni')
+end
  
 %% apply norm param to get mni coordinates
-% path_data='D:\Extinction\iEEG\';
-% path_info='D:\Extinction\iEEG\data\preproc\ieeg\datainfo\';
+path_data='D:\Extinction\iEEG\';
+path_info='D:\Extinction\iEEG\data\preproc\ieeg\datainfo\';
+
+% allsubs = {'c_sub01','c_sub02','c_sub03','c_sub04','c_sub05','c_sub06','c_sub07','c_sub08','c_sub09','c_sub10',...
+%          'c_sub11','c_sub12','c_sub13','c_sub14','c_sub15','c_sub16','c_sub17','c_sub18','c_sub20'};
+
+
+allsubs = {'c_sub19','c_sub21','c_sub22','c_sub23','c_sub24','c_sub25','c_sub26','c_sub29'};
+
+
+for i=1:numel(allsubs)
+sel_sub=allsubs{i};  
+
+% electrodeinfo
+info_file=strcat(path_info,sel_sub,'_datainfo');
+load(info_file)
+
+path_anat=strcat(path_data,'data\freesurfer_anat\output\',sel_sub,'\fieldtrip\',sel_sub,'\');
+path_fs=strcat(path_data,'\data\freesurfer_anat\output\',sel_sub,'\freesurfer\mri\');
+
+cd(path_anat)
+load(strcat(sel_sub,'_norm_mri.mat'))
+
+% % apply parameters to electrode postions
+elec_tmp = datainfo.elec_info.elec_ct_mr;
+elec_tmp.elecpos = ft_warp_apply(mr_mni.params,elec_tmp.elecpos, 'individual2sn');
+elec_tmp.chanpos = ft_warp_apply(mr_mni.params, elec_tmp.chanpos, 'individual2sn');
+elec_tmp.coordsys = 'mni';
+elec_tmp.cfg=mr_mni.cfg;
+elec_tmp.cfg.file=strcat(path_anat,sel_sub,'_norm_mri.mat');
 % 
-% % allsubs = {'c_sub01','c_sub02','c_sub03','c_sub04','c_sub05','c_sub06','c_sub07','c_sub08','c_sub09','c_sub10',...
-% %          'c_sub11','c_sub12','c_sub13','c_sub14','c_sub15','c_sub16','c_sub17','c_sub18','c_sub20'};
-% 
-% 
-% allsubs = {'c_sub04','c_sub05','c_sub06','c_sub07','c_sub08','c_sub10',...
-%          'c_sub12','c_sub13','c_sub15','c_sub17','c_sub18','c_sub20'};
-% 
-% for i=1:numel(allsubs)
-% sel_sub=allsubs{i};  
-% 
-% % electrodeinfo
-% info_file=strcat(path_info,sel_sub,'_datainfo_tmp');
-% load(info_file)
-% 
-% path_anat=strcat(path_data,'data\freesurfer_anat\output\',sel_sub,'\fieldtrip\',sel_sub,'\');
-% path_fs=strcat(path_data,'\data\freesurfer_anat\output\',sel_sub,'\freesurfer\mri\');
-% 
-% cd(path_anat)
-% load(strcat(sel_sub,'_norm_mri.mat'))
-% 
-% % % apply parameters to electrode postions
-% elec_tmp = datainfo.elec_info.elec_ct_mr;
-% elec_tmp.elecpos = ft_warp_apply(mr_mni.params,elec_tmp.elecpos, 'individual2sn');
-% elec_tmp.chanpos = ft_warp_apply(mr_mni.params, elec_tmp.chanpos, 'individual2sn');
-% elec_tmp.coordsys = 'mni';
-% elec_tmp.cfg=mr_mni.cfg;
-% elec_tmp.cfg.file=strcat(path_anat,sel_sub,'_norm_mri.mat');
-% % 
-% datainfo.elec_info.elec_mni=elec_tmp;
-% 
-% % save normalized coordinates in datainfo
-% info_file=strcat(path_info,sel_sub,'_datainfo');
-% save(info_file,'datainfo')
-% end
+datainfo.elec_info.elec_mni=elec_tmp;
+
+% save normalized coordinates in datainfo
+info_file=strcat(path_info,sel_sub,'_datainfo');
+save(info_file,'datainfo')
+end
 %% get labels using individualized freesurfer coordinates and normalized  coordinates
 % 
 % use individual freesurfer atlas
 % use mni based atlas
-% 
+
 % search with different query ranges: 1,3,5,7,9,11 (r=query/2-0.5),
 % radius:0,1,2,3,4,5
-% 
-% path_data='D:\Extinction\iEEG\';
-% path_info='D:\Extinction\iEEG\data\preproc\ieeg\datainfo\';
-% %allsubs = {'p_sub01','p_sub02','p_sub03','p_sub04','p_sub05','p_sub06','p_sub07','p_sub08'};
-% % allsubs = {'c_sub01','c_sub02','c_sub03','c_sub04','c_sub05','c_sub06','c_sub07','c_sub08','c_sub09','c_sub10',...
-% %           'c_sub11','c_sub12','c_sub13','c_sub14','c_sub15','c_sub16','c_sub17','c_sub18','c_sub20'};
-% 
-% allsubs = {'p_sub08'};
-% 
-% all_atlas={'freesurferDestrieux','afni','brainweb','freesurferDK','aal'}%,}
-% query_range=[1,3,5,7,9,11];
-% 
-% for i=1:numel(allsubs)
-% % save labels in file & as excel sheet
-% sel_sub=allsubs{i};
-% info_file=strcat(path_info,sel_sub,'_datainfo');
-% load(info_file)
-% 
-% for a=1:numel(all_atlas)
-% path_anat=strcat(path_data,'data\freesurfer_anat\output\',sel_sub,'\freesurfer\mri\');
-% %path_anat=strcat(path_data,'data\freesurfer_anat\output\',sel_sub,'\fieldtrip\',sel_sub,'\');
-% path_templates='D:\matlab_tools\fieldtrip-20200130\template\atlas\';
-% 
-% sel_atlas=all_atlas{a};
-% 
-% if ~any(strcmp(datainfo.elec_info.elec_ct_mr.label,datainfo.elec_info.elec_mni.label))
-% error('electrode labels in elec_ct_mr and elect_mni do not match');
-% end
-% 
-% elec_labels.labels=datainfo.elec_info.elec_ct_mr.label;
-% elec_labels.query_ranges=query_range;
-% datainfo.elec_info.ana_labels.labels=datainfo.elec_info.elec_ct_mr.label;
-% datainfo.elec_info.ana_labels.query_ranges=query_range;
-% 
-%       switch sel_atlas
-%         case 'freesurferDK'
-%             elecinfo=datainfo.elec_info.elec_ct_mr;            
-%             cd(path_anat)
-%             load('atlasDK.mat')
-%             atlas=atlasDK;
-%             atlas.coordsys='fsaverage'; 
-%             inputcoord='fsaverage';
-%             datainfo.elec_info.ana_labels.freesurferDK_def.file=strcat(path_anat,'atlasDK.mat');
-%             datainfo.elec_info.ana_labels.freesurferDK_def.atlas_resolution=atlas.hdr.volres;
-%             datainfo.elec_info.ana_labels.freesurferDK_def.atlas_unit=atlas.unit;
-%             datainfo.elec_info.ana_labels.freesurferDK_def.sphereradius_mm=(query_range-1).*0.5;
-%             datainfo.elec_info.ana_labels.freesurferDK_def.elec_def=elecinfo;
-%         case 'freesurferDestrieux'
-%             elecinfo=datainfo.elec_info.elec_ct_mr;              
-%             cd(path_anat)
-%             load('atlasDest.mat')
-%             atlas=atlasDest;
-%             atlas.coordsys='fsaverage'; 
-%             inputcoord='fsaverage';
-%             datainfo.elec_info.ana_labels.freesurferDestrieux_def.file=strcat(path_anat,'atlasDest.mat');
-%             datainfo.elec_info.ana_labels.freesurferDestrieux_def.atlas_resolution=atlas.hdr.volres;
-%             datainfo.elec_info.ana_labels.freesurferDestrieux_def.atlas_unit=atlas.unit;
-%             datainfo.elec_info.ana_labels.freesurferDestrieux_def.sphereradius_mm=(query_range-1).*0.5;
-%             datainfo.elec_info.ana_labels.freesurferDestrieux_def.elec_def=elecinfo;
-%         case 'aal'
-%              elecinfo=datainfo.elec_info.elec_mni;
-%              cd(path_templates)
-%              atlas_file=strcat(path_templates,'aal\ROI_MNI_V4.nii');
-%              atlas=ft_read_atlas(atlas_file);
-%             inputcoord='mni';
-%             datainfo.elec_info.ana_labels.aal_def.file=atlas_file;
-%             datainfo.elec_info.ana_labels.aal_def.atlas_resolution=atlas.hdr.volres;
-%             datainfo.elec_info.ana_labels.aal_def.atlas_unit=atlas.unit;
-%             datainfo.elec_info.ana_labels.aal_def.sphereradius_mm=(query_range-1);
-%             datainfo.elec_info.ana_labels.aal_def.elec_def=elecinfo;
-% 
-%         case 'afni'
-%              elecinfo=datainfo.elec_info.elec_mni;
-%              cd(path_templates)
-%              atlas_file=strcat(path_templates,'afni\TTatlas+tlrc.HEAD');
-%              atlas=ft_read_atlas(atlas_file);
-%              inputcoord='mni';
-%             datainfo.elec_info.ana_labels.afni_def.file=atlas_file;
-%             datainfo.elec_info.ana_labels.afni_def.atlas_resolution=[1 1 1];
-%             datainfo.elec_info.ana_labels.afni_def.atlas_unit=atlas.unit;
-%             datainfo.elec_info.ana_labels.afni_def.sphereradius_mm=(query_range-1).*0.5;
-%             datainfo.elec_info.ana_labels.afni_def.elec_def=elecinfo;
-%         case 'brainweb'
-%              elecinfo=datainfo.elec_info.elec_mni;
-%              cd(path_templates)
-%              atlas_file=strcat(path_templates,'brainweb\brainweb_discrete.mat');
-%              load(atlas_file)
-%              inputcoord='mni';
-%             datainfo.elec_info.ana_labels.brainweb_def.file=atlas_file;
-%             datainfo.elec_info.ana_labels.brainweb_def.atlas_resolution=[1 1 1];
-%             datainfo.elec_info.ana_labels.brainweb_def.atlas_unit=atlas.unit;
-%             datainfo.elec_info.ana_labels.brainweb_def.sphereradius_mm=(query_range-1).*0.5;
-%             datainfo.elec_info.ana_labels.brainweb_def.elec_def=elecinfo;
-%         otherwise
-%     end
-%       
-% for r=1:numel(query_range)
-% sel_range=query_range(r);
-% 
-% %parfor possible
-% parfor e=1:numel(elecinfo.label)
-% sel_pos=elecinfo.elecpos(e,:);
-% cfg            = [];
-% cfg.roi        = sel_pos;
-% cfg.atlas      = atlas;
-% cfg.output     = 'label';
-% cfg.minqueryrange = sel_range;
-% cfg.maxqueryrange = sel_range;
-% cfg.inputcoord=inputcoord;
-% labels = ft_volumelookup(cfg, atlas);
-% 
-% if sum(labels.count)>0
-% tmp_label(e,r)={labels.name(labels.count>0)'};
-% else
-% tmp_label(e,r)={'no label found'};
-% end
-% 
-% end
-% end
-% 
-% eval(strcat('datainfo.elec_info.ana_labels.',sel_atlas,'=tmp_label;'));
-% clear tmp_label
-% end
-% 
-% save(info_file,'datainfo')
-% end
+
+path_data='D:\Extinction\iEEG\';
+path_info='D:\Extinction\iEEG\data\preproc\ieeg\datainfo\';
+%allsubs = {'p_sub01','p_sub02','p_sub03','p_sub04','p_sub05','p_sub06','p_sub07','p_sub08'};
+% allsubs = {'c_sub01','c_sub02','c_sub03','c_sub04','c_sub05','c_sub06','c_sub07','c_sub08','c_sub09','c_sub10',...
+%           'c_sub11','c_sub12','c_sub13','c_sub14','c_sub15','c_sub16','c_sub17','c_sub18','c_sub20'};
+
+%allsubs = {'p_sub08'};
+allsubs = {'c_sub19','c_sub21','c_sub22','c_sub23','c_sub24','c_sub25','c_sub26','c_sub29'};
+
+all_atlas={'freesurferDestrieux','afni','brainweb','freesurferDK','aal'}%,}
+query_range=[1,3,5,7,9,11];
+
+for i=1:numel(allsubs)
+% save labels in file & as excel sheet
+sel_sub=allsubs{i};
+info_file=strcat(path_info,sel_sub,'_datainfo');
+load(info_file)
+
+for a=1:numel(all_atlas)
+%path_anat=strcat(path_data,'data\freesurfer_anat\output\',sel_sub,'\freesurfer\mri\');
+path_anat=strcat(path_data,'data\freesurfer_anat\output\',sel_sub,'\fieldtrip\',sel_sub,'\');
+path_templates='D:\matlab_tools\fieldtrip-20200130\template\atlas\';
+
+sel_atlas=all_atlas{a};
+
+if ~any(strcmp(datainfo.elec_info.elec_ct_mr.label,datainfo.elec_info.elec_mni.label))
+error('electrode labels in elec_ct_mr and elect_mni do not match');
+end
+
+elec_labels.labels=datainfo.elec_info.elec_ct_mr.label;
+elec_labels.query_ranges=query_range;
+datainfo.elec_info.ana_labels.labels=datainfo.elec_info.elec_ct_mr.label;
+datainfo.elec_info.ana_labels.query_ranges=query_range;
+
+      switch sel_atlas
+        case 'freesurferDK'
+            elecinfo=datainfo.elec_info.elec_ct_mr;            
+            cd(path_anat)
+            load('atlasDK.mat')
+            atlas=atlasDK;
+            atlas.coordsys='fsaverage'; 
+            inputcoord='fsaverage';
+            datainfo.elec_info.ana_labels.freesurferDK_def.file=strcat(path_anat,'atlasDK.mat');
+            datainfo.elec_info.ana_labels.freesurferDK_def.atlas_resolution=atlas.hdr.volres;
+            datainfo.elec_info.ana_labels.freesurferDK_def.atlas_unit=atlas.unit;
+            datainfo.elec_info.ana_labels.freesurferDK_def.sphereradius_mm=(query_range-1).*0.5;
+            datainfo.elec_info.ana_labels.freesurferDK_def.elec_def=elecinfo;
+        case 'freesurferDestrieux'
+            elecinfo=datainfo.elec_info.elec_ct_mr;              
+            cd(path_anat)
+            load('atlasDest.mat')
+            atlas=atlasDest;
+            atlas.coordsys='fsaverage'; 
+            inputcoord='fsaverage';
+            datainfo.elec_info.ana_labels.freesurferDestrieux_def.file=strcat(path_anat,'atlasDest.mat');
+            datainfo.elec_info.ana_labels.freesurferDestrieux_def.atlas_resolution=atlas.hdr.volres;
+            datainfo.elec_info.ana_labels.freesurferDestrieux_def.atlas_unit=atlas.unit;
+            datainfo.elec_info.ana_labels.freesurferDestrieux_def.sphereradius_mm=(query_range-1).*0.5;
+            datainfo.elec_info.ana_labels.freesurferDestrieux_def.elec_def=elecinfo;
+        case 'aal'
+             elecinfo=datainfo.elec_info.elec_mni;
+             cd(path_templates)
+             atlas_file=strcat(path_templates,'aal\ROI_MNI_V4.nii');
+             atlas=ft_read_atlas(atlas_file);
+            inputcoord='mni';
+            datainfo.elec_info.ana_labels.aal_def.file=atlas_file;
+            datainfo.elec_info.ana_labels.aal_def.atlas_resolution=atlas.hdr.volres;
+            datainfo.elec_info.ana_labels.aal_def.atlas_unit=atlas.unit;
+            datainfo.elec_info.ana_labels.aal_def.sphereradius_mm=(query_range-1);
+            datainfo.elec_info.ana_labels.aal_def.elec_def=elecinfo;
+
+        case 'afni'
+             elecinfo=datainfo.elec_info.elec_mni;
+             cd(path_templates)
+             atlas_file=strcat(path_templates,'afni\TTatlas+tlrc.HEAD');
+             atlas=ft_read_atlas(atlas_file);
+             inputcoord='mni';
+            datainfo.elec_info.ana_labels.afni_def.file=atlas_file;
+            datainfo.elec_info.ana_labels.afni_def.atlas_resolution=[1 1 1];
+            datainfo.elec_info.ana_labels.afni_def.atlas_unit=atlas.unit;
+            datainfo.elec_info.ana_labels.afni_def.sphereradius_mm=(query_range-1).*0.5;
+            datainfo.elec_info.ana_labels.afni_def.elec_def=elecinfo;
+        case 'brainweb'
+             elecinfo=datainfo.elec_info.elec_mni;
+             cd(path_templates)
+             atlas_file=strcat(path_templates,'brainweb\brainweb_discrete.mat');
+             load(atlas_file)
+             inputcoord='mni';
+            datainfo.elec_info.ana_labels.brainweb_def.file=atlas_file;
+            datainfo.elec_info.ana_labels.brainweb_def.atlas_resolution=[1 1 1];
+            datainfo.elec_info.ana_labels.brainweb_def.atlas_unit=atlas.unit;
+            datainfo.elec_info.ana_labels.brainweb_def.sphereradius_mm=(query_range-1).*0.5;
+            datainfo.elec_info.ana_labels.brainweb_def.elec_def=elecinfo;
+        otherwise
+    end
+      
+for r=1:numel(query_range)
+sel_range=query_range(r);
+
+%parfor possible
+parfor e=1:numel(elecinfo.label)
+sel_pos=elecinfo.elecpos(e,:);
+cfg            = [];
+cfg.roi        = sel_pos;
+cfg.atlas      = atlas;
+cfg.output     = 'label';
+cfg.minqueryrange = sel_range;
+cfg.maxqueryrange = sel_range;
+cfg.inputcoord=inputcoord;
+labels = ft_volumelookup(cfg, atlas);
+
+if sum(labels.count)>0
+tmp_label(e,r)={labels.name(labels.count>0)'};
+else
+tmp_label(e,r)={'no label found'};
+end
+
+end
+end
+
+eval(strcat('datainfo.elec_info.ana_labels.',sel_atlas,'=tmp_label;'));
+clear tmp_label
+end
+
+save(info_file,'datainfo')
+end
 
 %% add info to paris electrode info
 % info about electrodes
@@ -1000,7 +1002,8 @@ path_figs='D:\Extinction\iEEG\data\preproc\ieeg\datainfo\figure\';
 mkdir(path_figs)
 allsubs = {'c_sub01','c_sub02','c_sub03','c_sub04','c_sub05','c_sub06','c_sub07','c_sub08','c_sub09','c_sub10',...
          'c_sub11','c_sub12','c_sub13','c_sub14','c_sub15','c_sub16','c_sub17','c_sub18','c_sub20',...
-         'p_sub01','p_sub02','p_sub03','p_sub04','p_sub05','p_sub06','p_sub07'};
+         'p_sub01','p_sub02','p_sub03','p_sub04','p_sub05','p_sub06','p_sub07',...
+         'c_sub19','c_sub21','c_sub22','c_sub23','c_sub24','c_sub25','c_sub26','c_sub29'};
 
      
      load('D:\Extinction\iEEG\scripts\additional_functions\sel_colorseries.mat')
@@ -1104,8 +1107,10 @@ sel_regions={'Amygdala_L','Hippocampus_L','Rectus_L','Frontal_Sup_Orb_L','Fronta
 distance_region=3; % distance of electrodes from region
 
 allsubs = {'c_sub01','c_sub02','c_sub03','c_sub04','c_sub05','c_sub06','c_sub07','c_sub08','c_sub09','c_sub10',...
-          'c_sub11','c_sub12','c_sub13','c_sub14','c_sub15','c_sub16','c_sub17','c_sub18','c_sub20',...
-          'p_sub01','p_sub02','p_sub03','p_sub04','p_sub05','p_sub06','p_sub07'};
+         'c_sub11','c_sub12','c_sub13','c_sub14','c_sub15','c_sub16','c_sub17','c_sub18','c_sub20',...
+         'p_sub01','p_sub02','p_sub03','p_sub04','p_sub05','p_sub06','p_sub07',...
+         'c_sub19','c_sub21','c_sub22','c_sub23','c_sub24','c_sub25','c_sub26','c_sub29'};
+
 
 % load datainfo for each subject
 for n=1:numel(allsubs)
@@ -1173,8 +1178,10 @@ sel_atlas='freesurferDK';
 %sel_color= [0,0,1;0,0,1;0,0,1];%rgb value for each region
 
 allsubs = {'c_sub01','c_sub02','c_sub03','c_sub04','c_sub05','c_sub06','c_sub07','c_sub08','c_sub09','c_sub10',...
-    'c_sub11','c_sub12','c_sub13','c_sub14','c_sub15','c_sub16','c_sub17','c_sub18','c_sub20',...
-    'p_sub01','p_sub02','p_sub03','p_sub04','p_sub05','p_sub06','p_sub07'};
+         'c_sub11','c_sub12','c_sub13','c_sub14','c_sub15','c_sub16','c_sub17','c_sub18','c_sub20',...
+         'p_sub01','p_sub02','p_sub03','p_sub04','p_sub05','p_sub06','p_sub07',...
+         'c_sub19','c_sub21','c_sub22','c_sub23','c_sub24','c_sub25','c_sub26','c_sub29'};
+
 
 
 views(1,:,:)=[-90,30;90 -30;-90,0;90,0;0,-90;90 -40;];
@@ -1301,7 +1308,7 @@ clear c1 c2
 
 
 
-%% get labels using individualized freesurfer coordinates and normalized  coordinates
+%% get labels using individualized freesurfer coordinates and normalized  coordinates for bipolar contacts (first need to construct bipolar referencencing scheme)
 % 
 % use individual freesurfer atlas
 % use mni based atlas
