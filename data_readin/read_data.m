@@ -14,7 +14,7 @@ mkdir(path_out)
 %allsubs = {'p_sub01','p_sub02','p_sub03','p_sub06','p_sub07'};
 allsubs = {'p_sub09','p_sub10'};
 % check p_sub04 (two sess) and p_sub05 extra (discontunuous)
-for sub=1:length(allsubs)
+for sub=2:length(allsubs)
 sel_sub=allsubs{sub};
 
 load(strcat(path_trialinfo,sel_sub,'_trlinfo.mat'))
@@ -88,6 +88,14 @@ ind_vidonset(1:8)=[];
 trigger_value(1:8)=[];
 trigger_sp(1:8)=[];
 end
+
+%  restared test at thebeginning
+if strcmp(sel_sub,'p_sub09')
+ind_vidonset(1:11)=[];
+trigger_value(1:11)=[];
+trigger_sp(1:11)=[];
+end
+
 
 % compare trigger with info from logfile
     % check number of triggers
