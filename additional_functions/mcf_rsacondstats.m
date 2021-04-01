@@ -113,7 +113,7 @@ switch rsa_ga.dim_cond
                     if ~isempty(stats.posclusters)
                         data_pos=[stats.posclusters(:).clusterstat];
                         for i=1:numel(data_pos)
-                            p_pos(i)=(nearest(rand_pos,data_pos(i))./nrand);
+                            p_pos(i)=(sum(data_pos(i)<rand_pos)./nrand);
                         end
                     end
                 end
@@ -121,7 +121,7 @@ switch rsa_ga.dim_cond
                     if ~isempty(stats.negclusters)
                         data_neg=[stats.negclusters(:).clusterstat];
                         for i=1:numel(data_neg)
-                            p_neg(i)=(nearest(rand_neg,data_neg(i))./nrand);
+                            p_neg(i)=(sum(data_neg(i)>rand_neg)./nrand);
                         end
                     end
                 end
